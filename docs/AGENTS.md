@@ -12,6 +12,15 @@ This directory is the **React Native / Expo** implementation of a design that wa
 
 The HTML prototype (in `/tmp/feedlink/project/` — extracted from design bundle) is the **pixel-level design reference**. If you need to re-extract it, the gzip bundle was fetched from the design URL. All screen layouts, spacing, colors, and UX behavior should match the prototype exactly.
 
+## Codebase Conventions
+
+**Read `docs/CONVENTIONS.md` before making structural changes** (new routes, folder moves, import path changes). It documents:
+- Expo Router: groups `(folder)` vs regular folders, URL patterns, `<Slot />` vs `<Stack />`
+- Path aliases: `@/*` → project root (use instead of relative paths)
+- Folder structure rules: route files are thin re-exports from `src/screens/`
+- Component, styling, API, and git conventions
+- Things that break navigation (and how to fix them)
+
 ---
 
 ## Architecture

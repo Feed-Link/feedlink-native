@@ -14,7 +14,7 @@ The working prototype lives in `design-reference/` (copied from the design bundl
 
 There is no scaffolding yet in this directory — this is the blank slate for the RN implementation.
 
-**Docs:** `docs/MEMORY.md` (quick resume), `docs/PROGRESS.md` (build checklist), `docs/AGENTS.md` (agent guide).
+**Docs:** `docs/MEMORY.md` (quick resume), `docs/PROGRESS.md` (build checklist), `docs/AGENTS.md` (agent guide), `docs/CONVENTIONS.md` (codebase conventions — read this before structural changes).
 
 ---
 
