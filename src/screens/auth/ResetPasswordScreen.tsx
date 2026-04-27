@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C } from '../../theme';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Input from '../../components/Input';
 import Btn from '../../components/Btn';
-import ScreenHeader from '../../components/ScreenHeader';
 import { useApp } from '../../context/AppContext';
 import * as authApi from '../../api/client';
 
@@ -15,6 +16,7 @@ export default function ResetPasswordScreen() {
   const [loading, setLoading] = React.useState(false);
   const { showToast, setUser, setRole } = useApp();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const update = (k: string) => (v: string) => setForm(p => ({ ...p, [k]: v }));
 
@@ -45,28 +47,29 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <ScreenHeader title="Create New Password" onBack={() => router.push('/forgot-password' as any)} />
-      <View style={styles.body}>
-        <Text style={styles.heading}>Create New Password</Text>
-        <Text style={styles.subheading}>Enter the 6-digit code from your email.</Text>
-        <View style={styles.form}>
-          <Input label="OTP Code" value={form.otp} onChangeText={update('otp')} placeholder="000000" keyboardType="number-pad" />
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: C.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        {/* Green header */}
+        <View style={{ backgroundColor: C.green, paddingTop: insets.top + 16, paddingBottom: 48, paddingHorizontal: 20 }}>
+          <TouchableOpacity onPress={() => router.push('/forgot-password' as any)} style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.15)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+            <MaterialCommunityIcons name="arrow-left" size={20} color="#fff" />
+          </TouchableOpacity>
+          <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.15)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+            <MaterialCommunityIcons name="shield-key-outline" size={28} color="#fff" />
+          </View>
+          <Text style={{ fontWeight: '800', fontSize: 24, color: '#fff' }}>Create new password</Text>
+          <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>Enter the code sent to <Text style={{ fontWeight: '700', color: '#fff' }}>{email}</Text></Text>
+        </View>
+
+        <View style={{ marginHorizontal: 20, marginTop: -24, backgroundColor: C.surface, borderRadius: 24, padding: 24, borderWidth: 1, borderColor: C.border, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 16, elevation: 4 }}>
+          <Input label="OTP Code" value={form.otp} onChangeText={update('otp')} placeholder="6-digit code" keyboardType="number-pad" />
           <Input label="New Password" value={form.password} onChangeText={update('password')} placeholder="Min 6 characters" secureTextEntry />
           <Input label="Confirm Password" value={form.confirm} onChangeText={update('confirm')} placeholder="Repeat password" secureTextEntry />
+          <Btn fullWidth size="lg" variant="amber" onPress={submit} disabled={loading} loading={loading}>
+            {loading ? 'Resetting…' : 'Reset Password'}
+          </Btn>
         </View>
-        <Btn fullWidth size="lg" variant="amber" onPress={submit} disabled={loading}>
-          {loading ? 'Resetting…' : 'Reset Password'}
-        </Btn>
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.bg },
-  body: { padding: 32, paddingHorizontal: 24 },
-  heading: { fontWeight: '700', fontSize: 22, color: C.textDark, marginBottom: 8 },
-  subheading: { fontSize: 14, color: C.textMid, marginBottom: 24 },
-  form: { marginBottom: 20 },
-});

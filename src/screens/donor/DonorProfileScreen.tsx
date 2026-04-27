@@ -7,9 +7,9 @@ import { C } from '../../theme';
 import { donor } from '../../api/donor';
 import { auth, clearTokens } from '../../api/client';
 import Avatar from '../../components/Avatar';
-import Btn from '../../components/Btn';
 import ConfirmModal from '../../components/ConfirmModal';
 import BottomNavBar, { DONOR_TABS } from '../../components/BottomNavBar';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function DonorProfileScreen() {
   const { user, setUser, showToast } = useApp();
@@ -35,134 +35,108 @@ export default function DonorProfileScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 80 + insets.bottom }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Green header */}
-        <View style={{
-          backgroundColor: C.green,
-          paddingTop: insets.top + 12,
-          paddingHorizontal: 16,
-          paddingBottom: 80,
-        }}>
-          <Text style={{ fontWeight: '700', fontSize: 20, color: '#fff' }}>Profile</Text>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 100 + insets.bottom }} showsVerticalScrollIndicator={false}>
+
+        {/* Green header with avatar */}
+        <View style={{ backgroundColor: C.green, paddingTop: insets.top + 16, paddingHorizontal: 16, paddingBottom: 64, alignItems: 'center' }}>
+          <Text style={{ fontWeight: '700', fontSize: 17, color: '#fff', alignSelf: 'flex-start', marginBottom: 20 }}>Profile</Text>
+          <View style={{ position: 'relative' }}>
+            <Avatar name={user?.name} size={84} color={C.green} />
+            <TouchableOpacity
+              onPress={() => router.push('/donor/edit-profile' as any)}
+              activeOpacity={0.8}
+              style={{ position: 'absolute', bottom: 0, right: -4, width: 28, height: 28, borderRadius: 14, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 4, elevation: 3 }}
+            >
+              <MaterialCommunityIcons name="pencil" size={14} color={C.green} />
+            </TouchableOpacity>
+          </View>
+          <Text style={{ fontWeight: '700', fontSize: 18, color: '#fff', marginTop: 12 }}>{user?.name}</Text>
+          <View style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 99, paddingHorizontal: 12, paddingVertical: 4, marginTop: 6, borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' }}>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#fff' }}>Donor</Text>
+          </View>
         </View>
 
-        {/* Profile card */}
-        <View style={{ paddingHorizontal: 16, marginTop: -52 }}>
-          <View style={{
-            backgroundColor: C.surface,
-            borderWidth: 1,
-            borderColor: C.border,
-            borderRadius: 24,
-            padding: 16,
-            marginBottom: 16,
-          }}>
-            <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center', marginBottom: 14 }}>
-              <Avatar name={user?.name} size={64} color={C.green} />
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontWeight: '700', fontSize: 17, color: C.textDark }}>{user?.name}</Text>
-                <View style={{
-                  backgroundColor: C.tagGreen,
-                  borderRadius: 99,
-                  paddingHorizontal: 12,
-                  paddingVertical: 3,
-                  marginTop: 4,
-                  alignSelf: 'flex-start',
-                }}>
-                  <Text style={{ fontSize: 11, fontWeight: '700', color: C.green }}>Donor</Text>
-                </View>
-              </View>
-              <TouchableOpacity
-                onPress={() => router.push('/donor/edit-profile' as any)}
-                activeOpacity={0.7}
-                style={{
-                  width: 36, height: 36, borderRadius: 18,
-                  backgroundColor: C.surface2,
-                  alignItems: 'center', justifyContent: 'center',
-                }}
-              >
-                <Text style={{ fontSize: 16 }}>✏️</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={{ backgroundColor: C.surface2, borderRadius: 8, padding: 6, marginBottom: 6 }}>
-              <Text style={{ fontSize: 12, color: C.textDark }}>✉ {user?.email || '–'}</Text>
-            </View>
-            <View style={{ backgroundColor: C.surface2, borderRadius: 8, padding: 6 }}>
-              <Text style={{ fontSize: 12, color: C.textDark }}>📞 {user?.contact || '–'}</Text>
-            </View>
-          </View>
+        <View style={{ paddingHorizontal: 16, marginTop: -28 }}>
 
-          {/* Stats */}
+          {/* Stats — glass cards on white */}
           {stats && (
-            <View style={{
-              backgroundColor: C.surface,
-              borderWidth: 1,
-              borderColor: C.border,
-              borderRadius: 16,
-              padding: 14,
-              marginBottom: 16,
-            }}>
-              <Text style={{ fontSize: 10, fontWeight: '700', color: C.textMid, marginBottom: 12, textTransform: 'uppercase' }}>IMPACT</Text>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
+            <View style={{ backgroundColor: C.surface, borderRadius: 20, borderWidth: 1, borderColor: C.border, padding: 16, marginBottom: 16, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 3 }}>
+              <Text style={{ fontSize: 11, fontWeight: '700', color: C.textMid, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 14 }}>Your Impact</Text>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
                 {[
-                  { label: 'Completed', val: stats.listings_completed },
-                  { label: 'Recipients', val: stats.unique_recipients_served },
-                  { label: 'Active', val: stats.listings_active },
+                  { label: 'Completed', val: stats.listings_completed ?? 0, icon: 'check-decagram' },
+                  { label: 'Recipients', val: stats.unique_recipients_served ?? 0, icon: 'account-group' },
+                  { label: 'Active now', val: stats.listings_active ?? 0, icon: 'fire' },
                 ].map(s => (
-                  <View key={s.label} style={{ flex: 1, backgroundColor: C.bg, borderRadius: 12, padding: 10, alignItems: 'center' }}>
-                    <Text style={{ fontWeight: '700', fontSize: 22, color: C.green }}>{s.val}</Text>
-                    <Text style={{ fontSize: 10, color: C.textMid, fontWeight: '600' }}>{s.label}</Text>
+                  <View key={s.label} style={{ flex: 1, backgroundColor: C.bg, borderRadius: 14, padding: 12, alignItems: 'center', gap: 6 }}>
+                    <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: C.tagGreen, alignItems: 'center', justifyContent: 'center' }}>
+                      <MaterialCommunityIcons name={s.icon as any} size={16} color={C.green} />
+                    </View>
+                    <Text style={{ fontWeight: '800', fontSize: 22, color: C.textDark }}>{s.val}</Text>
+                    <Text style={{ fontSize: 10, color: C.textMid, fontWeight: '600', textAlign: 'center' }}>{s.label}</Text>
                   </View>
                 ))}
               </View>
             </View>
           )}
 
-          {/* Account */}
-          <Text style={{ fontSize: 10, fontWeight: '700', color: C.textMid, marginBottom: 8, textTransform: 'uppercase' }}>ACCOUNT</Text>
-          <View style={{
-            backgroundColor: C.surface,
-            borderWidth: 1,
-            borderColor: C.border,
-            borderRadius: 16,
-            overflow: 'hidden',
-            marginBottom: 16,
-          }}>
+          {/* Contact info */}
+          <View style={{ backgroundColor: C.surface, borderRadius: 20, borderWidth: 1, borderColor: C.border, overflow: 'hidden', marginBottom: 16, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}>
             {[
-              { label: 'Edit profile', action: () => router.push('/donor/edit-profile' as any) },
-              { label: 'About FeedLink', action: () => {} },
+              { icon: 'email-outline', label: 'Email', value: user?.email || '–' },
+              { icon: 'phone-outline', label: 'Phone', value: user?.contact || '–' },
+            ].map((row, i) => (
+              <View key={row.label}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
+                  <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: C.surface2, alignItems: 'center', justifyContent: 'center' }}>
+                    <MaterialCommunityIcons name={row.icon as any} size={18} color={C.textMid} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 11, color: C.textLight, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.3 }}>{row.label}</Text>
+                    <Text style={{ fontSize: 14, color: C.textDark, fontWeight: '500', marginTop: 1 }}>{row.value}</Text>
+                  </View>
+                </View>
+                {i === 0 && <View style={{ height: 1, backgroundColor: C.border, marginHorizontal: 16 }} />}
+              </View>
+            ))}
+          </View>
+
+          {/* Account actions */}
+          <View style={{ backgroundColor: C.surface, borderRadius: 20, borderWidth: 1, borderColor: C.border, overflow: 'hidden', marginBottom: 16, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}>
+            {[
+              { icon: 'account-edit-outline', label: 'Edit profile', color: C.textDark, action: () => router.push('/donor/edit-profile' as any) },
+              { icon: 'information-outline', label: 'About FeedLink', color: C.textDark, action: () => {} },
             ].map((item, i, arr) => (
               <View key={item.label}>
-                <TouchableOpacity
-                  onPress={item.action}
-                  activeOpacity={0.7}
-                  style={{ padding: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
-                >
-                  <Text style={{ fontWeight: '700', fontSize: 14, color: C.textDark }}>{item.label}</Text>
-                  <Text style={{ fontSize: 18, color: C.textLight }}>›</Text>
+                <TouchableOpacity onPress={item.action} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
+                  <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: C.surface2, alignItems: 'center', justifyContent: 'center' }}>
+                    <MaterialCommunityIcons name={item.icon as any} size={18} color={item.color} />
+                  </View>
+                  <Text style={{ flex: 1, fontSize: 14, fontWeight: '600', color: item.color }}>{item.label}</Text>
+                  <MaterialCommunityIcons name="chevron-right" size={18} color={C.textLight} />
                 </TouchableOpacity>
                 {i < arr.length - 1 && <View style={{ height: 1, backgroundColor: C.border, marginHorizontal: 16 }} />}
               </View>
             ))}
           </View>
 
-          <Btn
-            variant="danger"
-            size="lg"
-            fullWidth
+          {/* Logout */}
+          <TouchableOpacity
             onPress={() => setConfirmLogout(true)}
-            style={{ borderColor: 'rgb(250,202,202)' }}
-          >Log out</Btn>
+            activeOpacity={0.8}
+            style={{ backgroundColor: C.surface, borderRadius: 20, borderWidth: 1, borderColor: 'rgb(250,202,202)', flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}
+          >
+            <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgb(254,242,242)', alignItems: 'center', justifyContent: 'center' }}>
+              <MaterialCommunityIcons name="logout" size={18} color={C.red} />
+            </View>
+            <Text style={{ flex: 1, fontSize: 14, fontWeight: '600', color: C.red }}>Log out</Text>
+            <MaterialCommunityIcons name="chevron-right" size={18} color="rgb(250,202,202)" />
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
-      {/* Bottom nav */}
       <BottomNavBar tabs={DONOR_TABS} active="/donor/profile" />
 
-      {/* Logout confirmation modal */}
       {confirmLogout && (
         <ConfirmModal
           title="Log out?"

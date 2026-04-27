@@ -7,184 +7,123 @@ Resume guide at the bottom.
 
 ## Project Setup
 
-- [x] Scaffold Expo project (existing Expo Router setup)
-- [x] Install core dependencies (async-storage, maps, image-picker, fonts)
-- [x] Install map/location deps (react-native-maps, expo-location)
-- [x] Install media deps (expo-image-picker)
-- [x] Install font (@expo-google-fonts/inter)
-- [x] Set up folder structure (src/api, src/components, src/context, src/utils)
-- [x] Set up theme/colors file (`src/theme.ts`) — colors, spacing, radius, typography
-- [x] Set up API client (`src/api/client.ts`) — base URL, auth headers, token refresh, 401 handler, all endpoints
-- [x] Set up AsyncStorage auth helpers (token management in client.ts)
-- [x] Set up navigation skeleton (root stack + auth/donor/recipient groups)
-- [x] Set up AppContext (`src/context/AppContext.tsx`) — user, role, unreadCount, navigate, showToast, logout
-- [x] Set up notification polling (30s interval in AppContext)
+- [x] Scaffold Expo project (Expo Router file-based routing)
+- [x] Install core dependencies (async-storage, expo-location, image-picker, fonts)
+- [x] Install react-native-webview (map WebView fallback for Expo Go)
+- [x] Set up folder structure (src/api, src/components, src/context, src/screens)
+- [x] Set up theme/colors (`src/theme.ts`)
+- [x] Set up API client (`src/api/client.ts`) — base URL, auth headers, Accept: application/json, token management
+- [x] Set up AppContext — user, role, unreadCount, showToast, logout, notification polling
+- [x] Toast rendered inside AppProvider (was missing — fixed)
+- [x] Notification polling fixed (`getNotifications` not `notifications.list`)
 
 ---
 
 ## Auth Screens
 
-- [x] Splash screen (logo + loading, auto-check auth)
-- [x] Onboarding / Role picker (donor vs recipient)
-- [x] Register screen (name, email, phone, password, terms)
-- [x] Verify OTP screen (6-digit code, handles register/login/reset contexts)
-- [x] Login screen (auto-redirect to OTP if unverified)
-- [x] Forgot Password screen (email input → sends reset code)
-- [x] Reset Password screen (OTP + new password confirmation)
+- [x] Splash screen — vector leaf icon, ActivityIndicator, green bg
+- [x] Onboarding / Role picker — green header, vector icons, donor/recipient cards
+- [x] Register screen — green header overlapping card pattern, role badge
+- [x] Verify OTP screen — progress dots, amber-filled boxes, disable until 6 digits
+- [x] Login screen — green header + floating card, KeyboardAvoidingView
+- [x] Forgot Password screen — consistent green header pattern
+- [x] Reset Password screen — consistent green header pattern
 
 ---
 
 ## Shared Components
 
-- [x] `Toast` component (success / error / info styles)
-- [x] `Btn` component (green, amber, red, outline variants, loading state)
-- [x] `Input` component (filled bg, label, required indicator, helper text)
-- [x] `ScreenHeader` (title, optional back button, safe-area top inset)
-- [x] `BottomNavBar` — Donor variant (Home / Listings / Map / Alerts / Profile)
-- [] `BottomNavBar` — Recipient variant (Home / Claims / Map / Requests / Profile)
-- [x] `TextArea` (similar to Input but multi-line)
-- [x] `TagChip` (audience + food state groups, multi-select)
-- [x] `ListingCard` (thumbnail, title, quantity, tags, distance, status badge)
-- [x] `StatusBadge` (active / claimed / completed / expired / cancelled)
-- [x] `EmptyState` (icon in rounded container + message)
-- [x] `Spinner` / loading overlay
-- [x] `LocationPickerModal` (map + search + GPS + reverse geocode)
-- [x] `NotifPagination` (prev/next + page pills)
+- [x] `Toast` — rendered in AppProvider, success/error/info
+- [x] `Btn` — loading spinner prop, amber/green/danger/outline variants
+- [x] `Input` — filled bg, label, required indicator
+- [x] `TextArea` — multi-line input
+- [x] `ScreenHeader` — title + back button
+- [x] `BottomNavBar` — Donor variant (Home/Listings/Map/Alerts/Profile)
+- [x] `TagChip` — multi-select food type tags
+- [x] `ListingCard` — full-width thumbnail, time left, claims bar, address, vector icons
+- [x] `StatusBadge` — active/claimed/completed/expired/cancelled
+- [x] `EmptyState` — icon bubble + message
+- [x] `Spinner`
+- [x] `LocationPickerModal` — Photon geocoding search (Nepal bbox), GPS button, WebView map
+- [x] `MapPickerView` — WebView + Leaflet map, same props interface as react-native-maps (easy swap later)
+- [x] `Avatar`
+- [x] `ConfirmModal`
+- [x] `NotifPagination` — prev/next (replaced by cursor pagination in notifications)
 
 ---
 
 ## Donor Screens
 
-- [x] Donor Home (stats card + active listings feed)
-- [x] My Listings (filter tabs: active/claimed/completed/expired/cancelled, pagination)
-- [x] Create Listing (title, desc, quantity, tags, photos ×4, location picker, expires_at, pickup_before, pickup_instructions)
-- [x] Listing Detail — Donor (photo gallery/hero, claims list, confirm/reject claim, cancel listing, reopen listing)
-- [x] Donor Map (nearby food requests as markers, tap → popup → navigate to detail)
-- [x] Donor Notifications (paginated list, mark read, mark all read)
-- [x] Donor Profile (stats summary, edit link, logout)
-- [x] Edit Profile (name, contact)
+- [x] Donor Home — time greeting, stats cards (glass style), pending claims section, nearby requests banner, pull to refresh
+- [x] My Listings — sort by newest/expiring, filter tabs with icons, pull to refresh, FAB, per-tab empty states
+- [x] Create Listing — 3-step form (Details → Tags & Photos → Location & Time), no scroll per step, keyboard dismiss
+- [x] Listing Detail — photo hero, info card with vector icons, pending claims confirm/reject, cancel above nav bar
+- [x] Donor Map — Leaflet WebView map, floating header card with filters, request list, offer bottom sheet
+- [x] Donor Notifications — cursor pagination (`?cursor=true` then `next_cursor`), Load more button, pull to refresh
+- [x] Donor Profile — green header with avatar, impact stats, contact rows, modern account/logout rows
+- [x] Edit Profile — (route exists at `/donor/edit-profile`)
 
 ---
 
 ## Recipient Screens
 
-- [] Recipient Home (nearby listings, list/map toggle, radius filter)
-- [] Listing Detail — Recipient (photo gallery, claim button → pending state → confirmed → mark collected)
-- [] My Claims (list with status badges, paginated)
-- [] Recipient Map (listing markers, tap → popup → navigate)
-- [] My Requests (list of own requests, CRUD)
-- [] Create Request (title, desc, quantity, food type, tags, location picker, needed_by)
-- [] Request Detail — Recipient (view acceptances, confirm/reject donor offers)
-- [] Recipient Notifications (paginated, badge reset on open)
-- [] Recipient Profile (edit link, logout)
-- [] Edit Profile (shared with donor, same component)
+- [ ] Recipient Home
+- [ ] Listing Detail — Recipient
+- [ ] My Claims
+- [ ] Recipient Map
+- [ ] My Requests
+- [ ] Create Request
+- [ ] Request Detail — Recipient
+- [ ] Recipient Notifications
+- [ ] Recipient Profile
+- [ ] Edit Profile (shared)
 
 ---
 
 ## Features / Polish
 
-- [] Token refresh on 401 (interceptor in API client)
-- [] Photo upload flow (pick → POST /upload/photo → collect URL → attach to form)
-- [] Timezone-safe datetime inputs (`toLocalISO()` helper, no UTC conversion)
-- [] Claim state persistence (fetch existing claims on mount, don't rely on local state)
-- [] Notification badge polling (30s, toast on new, reset on open)
-- [] Map markers with popup + navigate (emoji icon, title/qty/address)
-- [] Android back button handling (navigate to home, not back stack)
-- [] iOS safe areas on all screens (useSafeAreaInsets)
-- [] Offline / error states on key screens
-- [] App icon + splash screen assets (icons already in design-reference/icons/)
+- [x] `Accept: application/json` header on all API requests — fixes Laravel 302 redirect
+- [x] Photo upload — permission request, correct index tracking, error handling
+- [x] Timezone-safe datetime — `toLocalSlice()` stores local time, `toLocalISO()` adds offset for API
+- [x] Notification bell badge — fixed polling, proper `unread_count` path, amber badge with green ring
+- [x] Cursor pagination for notifications — `?cursor=true` first page, `next_cursor` token for subsequent
+- [x] Pull to refresh — Home, Listings, Notifications, Map
+- [x] Map via WebView + Leaflet (Expo Go compatible) — zoom controls bottom-right, green pin marker
+- [x] MapPickerView architecture — drop-in swap for react-native-maps when dev build is ready
+- [x] Photon geocoding (Komoot) — Nepal bbox filter, no API key required
+- [x] Date picker — native iOS spinner in Modal, `tempDate` state, Cancel/Done, local timezone
+- [x] 3-step create listing form — no scroll needed, keyboard dismiss on tap outside
+- [x] iOS safe areas on all screens (`useSafeAreaInsets`)
+- [ ] react-native-maps swap (when EAS dev build is ready — see MapPickerView.tsx comments)
+- [ ] Token refresh on 401 interceptor
+- [ ] Android back button handling
+- [ ] Offline / error states on key screens
+- [ ] App icon + splash screen assets
 
 ---
 
-## Suggested Folder Structure
+## Architecture Notes
 
-```
-feedlink-app/
-├── design-reference/       ← HTML prototype (source of truth for design)
-│   ├── index.html
-│   ├── js/
-│   └── uploads/
-├── src/
-│   ├── api/
-│   │   ├── client.ts       ← base fetch, auth headers, token refresh
-│   │   ├── auth.ts
-│   │   ├── donor.ts
-│   │   ├── recipient.ts
-│   │   └── shared.ts
-│   ├── components/
-│   │   ├── Btn.tsx
-│   │   ├── Input.tsx
-│   │   ├── TagChip.tsx
-│   │   ├── ListingCard.tsx
-│   │   ├── StatusBadge.tsx
-│   │   ├── ScreenHeader.tsx
-│   │   ├── BottomNavBar.tsx
-│   │   ├── EmptyState.tsx
-│   │   ├── Toast.tsx
-│   │   ├── LocationPickerModal.tsx
-│   │   └── NotifPagination.tsx
-│   ├── screens/
-│   │   ├── auth/
-│   │   │   ├── SplashScreen.tsx
-│   │   │   ├── OnboardingScreen.tsx
-│   │   │   ├── RegisterScreen.tsx
-│   │   │   ├── VerifyOTPScreen.tsx
-│   │   │   ├── LoginScreen.tsx
-│   │   │   ├── ForgotPasswordScreen.tsx
-│   │   │   └── ResetPasswordScreen.tsx
-│   │   ├── donor/
-│   │   │   ├── DonorHomeScreen.tsx
-│   │   │   ├── DonorListingsScreen.tsx
-│   │   │   ├── CreateListingScreen.tsx
-│   │   │   ├── DonorListingDetailScreen.tsx
-│   │   │   ├── DonorMapScreen.tsx
-│   │   │   ├── DonorNotificationsScreen.tsx
-│   │   │   ├── DonorProfileScreen.tsx
-│   │   │   └── EditProfileScreen.tsx
-│   │   └── recipient/
-│   │       ├── RecipientHomeScreen.tsx
-│   │       ├── RecipientListingDetailScreen.tsx
-│   │       ├── MyClaimsScreen.tsx
-│   │       ├── RecipientMapScreen.tsx
-│   │       ├── MyRequestsScreen.tsx
-│   │       ├── CreateRequestScreen.tsx
-│   │       ├── RequestDetailScreen.tsx
-│   │       ├── RecipientNotificationsScreen.tsx
-│   │       ├── RecipientProfileScreen.tsx
-│   │       └── EditProfileScreen.tsx
-│   ├── navigation/
-│   │   ├── RootNavigator.tsx
-│   │   ├── AuthNavigator.tsx
-│   │   ├── DonorNavigator.tsx
-│   │   └── RecipientNavigator.tsx
-│   ├── context/
-│   │   └── AppContext.tsx
-│   ├── hooks/
-│   │   ├── useToast.ts
-│   │   └── useNotificationPoll.ts
-│   ├── utils/
-│   │   ├── toLocalISO.ts   ← timezone-safe datetime
-│   │   └── storage.ts      ← AsyncStorage wrappers
-│   └── theme.ts            ← colors, typography, spacing
-├── assets/
-│   └── icons/              ← copy from design-reference/icons/
-├── CLAUDE.md
-├── AGENTS.md
-├── Progress.md             ← this file
-└── memory.md               ← session resume guide
-```
+### Routing
+- Expo Router with route groups: `app/(auth)/` and `app/(app)/donor/`
+- No nested `_layout.tsx` inside donor/ or recipient/ — breaks route discovery
+- Route files are thin re-exports: `export default from '../../../src/screens/...'`
+
+### Map strategy
+- **Now (Expo Go):** `MapPickerView` uses `react-native-webview` + Leaflet
+- **Later (dev build):** swap WebView block inside `MapPickerView` with `react-native-maps` — parent interface unchanged
+- Comment in `MapPickerView.tsx` shows exact swap instructions
+
+### Notifications pagination
+- Uses cursor mode: `?cursor=true` (first), `?cursor=<token>` (next pages)
+- `has_more` drives "Load more" button visibility
+- Pull to refresh resets to `cursor=true`
 
 ---
 
 ## Resume Guide
 
-When picking this up in a new session:
-
-1. Read `CLAUDE.md` — full design context, screen inventory, API reference, UX decisions
-2. Read `Progress.md` (this file) — check what's done, pick the next unchecked block
-3. Check `design-reference/index.html` for the exact HTML/CSS of any screen you're building
-4. Check `design-reference/js/` — `shared.jsx`, `donor.jsx`, `recipient.jsx`, `auth.jsx`, `api.js`
-5. Ask Claude: *"Let's implement [screen/feature name]"* — it has full context from CLAUDE.md
-
-**Build order recommendation:**
-Project Setup → Shared Components → Auth Screens → Donor Screens → Recipient Screens → Polish
+1. Read `CLAUDE.md` — design context, colors, API reference, UX decisions
+2. Read this file — check first unchecked item
+3. Read `MEMORY.md` — quick orientation and critical rules
+4. **Next up:** Recipient screens (start with Recipient Home)

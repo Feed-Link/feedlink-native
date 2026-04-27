@@ -75,8 +75,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const pollNotifications = async () => {
       try {
-        const res = await notifications.list({ per_page: 1 });
-        const newCount = res.meta?.unread_count ?? 0;
+        const res = await notifications.getNotifications('?per_page=1');
+        const newCount = res.data?.unread_count ?? res.meta?.unread_count ?? 0;
         const isOnNotificationsScreen = segments.some(s => s === 'notifications');
 
         if (newCount > unreadCount && !isOnNotificationsScreen) {

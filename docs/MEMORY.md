@@ -15,21 +15,31 @@ Quick-reference for resuming work across sessions.
 
 ---
 
+## Current State (as of Apr 27 2026)
+
+All **donor screens are complete** with full UI/UX polish. Recipient screens not started yet.
+
+**What's built:**
+- Full auth flow (splash → onboarding → register → OTP → login → forgot/reset)
+- All 8 donor screens: Home, Listings, Create Listing (3-step), Listing Detail, Map, Notifications, Profile, Edit Profile
+- All shared components including `MapPickerView` (WebView + Leaflet)
+
+**What's next:** Recipient screens — start with Recipient Home.
+
+---
+
 ## Where Things Live
 
 | Path | What it is |
 |---|---|
 | `CLAUDE.md` | Full context — colors, screen list, API reference, UX decisions |
-| `AGENTS.md` | Agent-facing implementation guide — conventions, rules, API table |
-| `Progress.md` | Build checklist + folder structure + resume guide |
-| `memory.md` | This file — quick reference |
-| `design-reference/index.html` | Full compiled HTML prototype (source of truth for UI) |
-| `design-reference/js/shared.jsx` | Shared components (colors, cards, inputs, nav) |
-| `design-reference/js/auth.jsx` | Auth screens source |
-| `design-reference/js/donor.jsx` | Donor screens source |
-| `design-reference/js/recipient.jsx` | Recipient screens source |
-| `design-reference/js/api.js` | API client (all endpoints, token refresh logic) |
-| `design-reference/uploads/API_DOC.md` | Full API documentation |
+| `docs/PROGRESS.md` | Build checklist + architecture notes + resume guide |
+| `docs/MEMORY.md` | This file — quick reference |
+| `src/api/client.ts` | Base fetch client — all auth, shared, notifications endpoints |
+| `src/api/donor.ts` | All donor API endpoints |
+| `src/context/AppContext.tsx` | Global state — user, role, toast, unreadCount, notification polling |
+| `src/components/MapPickerView.tsx` | WebView+Leaflet map — swap-ready for react-native-maps |
+| `src/components/LocationPickerModal.tsx` | Location picker with Photon search + GPS + map |
 
 ---
 
@@ -37,86 +47,106 @@ Quick-reference for resuming work across sessions.
 
 | Name | Value | Use |
 |---|---|---|
-| green | `#16a34a` | Brand, primary buttons |
-| amber | `#f59e0b` | Pending / warning |
+| green | `#16a34a` | Brand, primary buttons, active states |
+| amber | `#f59e0b` | Auth screens, pending/warning |
 | red | `#dc2626` | Destructive / error |
 | bg | `#fafaf9` | Screen background |
 | surface | `#ffffff` | Cards |
 | surface2 | `#f5f4f3` | Input fills |
 | textDark | `#1c1917` | Primary text |
 | textMid | `#78716c` | Secondary text |
+| tagGreen | `#dcfce4` | Green tag background |
+| tagAmber | `#fef3c7` | Amber tag background |
 
-Font: **Inter** (400–800)
+Font: **Inter** (400–800 weights)
 
 ---
 
 ## Critical Implementation Rules
 
-### Timezone
-Never use `.toISOString()` for `expires_at`, `pickup_before`, `needed_by`.
-Send local ISO with offset: `2026-04-25T20:02:00+05:45`
-
+### API — always include Accept header
 ```ts
-function toLocalISO(dateStr: string): string {
-  const d = new Date(dateStr);
+headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+```
+Without it, Laravel returns 302 redirect instead of JSON.
+
+### Timezone — never use .toISOString()
+```ts
+// Store locally (for display):
+const toLocalSlice = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+// Send to API (with offset):
+const toLocalISO = (val: string) => {
+  const d = new Date(val);
   const off = -d.getTimezoneOffset();
   const sign = off >= 0 ? '+' : '-';
-  const hh = String(Math.floor(Math.abs(off) / 60)).padStart(2, '0');
-  const mm = String(Math.abs(off) % 60).padStart(2, '0');
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00${sign}${hh}:${mm}`;
-}
+  const hh = pad(Math.floor(Math.abs(off) / 60));
+  const mm = pad(Math.abs(off) % 60);
+  return `${val}:00${sign}${hh}:${mm}`;
+};
 ```
 
-### Claim state (recipient)
-Always fetch user's claims on mount — never rely on local state across navigations.
-After claiming: show "⏳ Claim pending" + Cancel button. Claim button only when no active claim.
+### Notifications — cursor pagination
+```
+First page:  GET /notifications?cursor=true&per_page=15
+Next pages:  GET /notifications?cursor=<next_cursor token>
+Response:    data.items, data.unread_count, data.meta.next_cursor, data.meta.has_more
+```
+
+### Map — current architecture
+- `MapPickerView` uses WebView + Leaflet (works in Expo Go)
+- Props: `lat`, `lng`, `onPinChange(lat, lng)`, `style`
+- To swap to react-native-maps: replace WebView block in `MapPickerView.tsx` only — all parents stay the same
+- See migration comment in the file
+
+### Location search
+- Uses Photon (Komoot) — `https://photon.komoot.io/api/?q=...&bbox=80.058,26.347,88.201,29.305`
+- Nepal bbox baked in, no API key needed
+- Reverse geocode: `https://photon.komoot.io/reverse?lon=...&lat=...&limit=1`
 
 ### Photo upload
-Upload each photo immediately on selection → `POST /upload/photo` (multipart) → collect URL → include in listing payload. Max 4 photos.
+```ts
+// Upload immediately on select, before form submit
+const formData = new FormData();
+formData.append('photo', { uri, name: 'photo.jpg', type: 'image/jpeg' });
+const res = await shared.uploadPhoto(formData); // includes Accept + Auth headers
+const url = res?.data?.url || res?.url;
+```
 
-### Notifications
-Poll `GET /notifications?per_page=1` every 30s. Toast only when unread_count increases and not on notifications screen. Reset badge when screen opens.
+### Route structure
+```
+app/(auth)/           ← auth screens
+app/(app)/donor/      ← donor screens
+app/(app)/recipient/  ← recipient screens (to be built)
+```
+**Never add `_layout.tsx` inside donor/ or recipient/ folders** — breaks Expo Router route discovery.
 
-### Login → unverified email
-If login fails with "not verified" error → auto call resendOtp → navigate to verify-otp with `context: 'login'`.
-
-### API response shape
-All responses: `{ status_code, message, data }`. Always read `response.data`.
+### Claim state (recipient — for when building recipient screens)
+Always fetch user's existing claims on mount. Never rely on local state across navigations.
+Show "Claim pending" amber bar + Cancel button when active claim exists. Show Claim button only when no active claim.
 
 ---
 
 ## Tags Enum
 ```
-for_humans | for_animals | for_both       (Audience group)
-cooked | raw_ingredients | packaged       (Food State group)
+for_humans | for_animals | for_both       (Audience)
+cooked | raw_ingredients | packaged       (Food State)
 ```
-Same tags used in both Create Listing AND Create Request — must be visually consistent.
+Same tags for both Create Listing AND Create Request.
 
 ---
 
 ## Listing Status Flow
 ```
 active → claimed (donor confirms) → completed (recipient marks collected)
-       → expired (auto by scheduler)
+       → expired (auto by server)
        → cancelled (donor cancels)
 ```
 
 ---
 
-## Screens Quick Count
-- Auth: 7 screens
-- Donor: 8 screens
-- Recipient: 10 screens
-- **Total: 25 screens**
-
-See `Progress.md` for full checklist and build order.
-
----
-
 ## Session Resume Steps
 1. Read this file for quick orientation
-2. Open `Progress.md` — find first unchecked item
-3. Open `design-reference/index.html` or the relevant `.jsx` file for the screen you're building
-4. Open `design-reference/uploads/API_DOC.md` if you need endpoint details
-5. Build, check off, repeat
+2. Open `docs/PROGRESS.md` — find first unchecked item (Recipient screens)
+3. Check `design-reference/` for the HTML prototype of the screen you're building
+4. Build, check off, repeat

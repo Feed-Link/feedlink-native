@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C } from '../theme';
 import * as Location from 'expo-location';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MapPickerView from './MapPickerView';
 
 interface LocationPickerModalProps {
   lat: number;
@@ -163,16 +164,18 @@ export default function LocationPickerModal({ lat, lng, address, onConfirm, onCl
             </View>
           ) : null}
 
-          {/* Map placeholder */}
+          {/* Map */}
           {results.length === 0 && (
-            <View style={{ flex: 1, backgroundColor: C.surface2, alignItems: 'center', justifyContent: 'center', gap: 12, marginHorizontal: 16, marginVertical: 12, borderRadius: 12 }}>
-              <MaterialCommunityIcons name="map-marker-radius" size={48} color={C.green} />
-              <Text style={{ fontSize: 14, color: C.textMid, fontWeight: '600' }}>Tap "My location" or search</Text>
-              <View style={{ backgroundColor: C.tagGreen, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 }}>
-                <Text style={{ fontSize: 12, color: C.green, fontWeight: '700' }}>
-                  {pin.lat.toFixed(5)}, {pin.lng.toFixed(5)}
-                </Text>
-              </View>
+            <View style={{ flex: 1, marginHorizontal: 16, marginVertical: 8, borderRadius: 14, overflow: 'hidden', minHeight: 220 }}>
+              <MapPickerView
+                lat={pin.lat}
+                lng={pin.lng}
+                onPinChange={(lat, lng) => {
+                  setPin({ lat, lng });
+                  reverseGeocode(lat, lng);
+                }}
+                style={{ flex: 1 }}
+              />
             </View>
           )}
         </ScrollView>

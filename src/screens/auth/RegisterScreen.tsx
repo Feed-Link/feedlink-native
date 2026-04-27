@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C } from '../../theme';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Input from '../../components/Input';
 import Btn from '../../components/Btn';
-import ScreenHeader from '../../components/ScreenHeader';
 import { useApp } from '../../context/AppContext';
 import * as authApi from '../../api/client';
 
@@ -16,6 +17,7 @@ export default function RegisterScreen() {
   const [loading, setLoading] = React.useState(false);
   const { showToast } = useApp();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const update = (k: string) => (v: any) => setForm(p => ({ ...p, [k]: v }));
 
@@ -40,53 +42,50 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <ScreenHeader title="Create Account" onBack={() => router.back()} />
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <View style={styles.roleBadge}>
-          <Text style={styles.roleBadgeText}>Signing up as {role === 'donor' ? 'Donor' : 'Recipient'}</Text>
-        </View>
-        <Input label="Full Name" value={form.name} onChangeText={update('name')} placeholder="Samaya Mahate" required />
-        <Input label="Email" value={form.email} onChangeText={update('email')} placeholder="hello@example.com" keyboardType="email-address" required />
-        <Input label="Phone Number" value={form.contact} onChangeText={update('contact')} placeholder="98XXXXXXXX" keyboardType="phone-pad" required />
-        <Input label="Password" value={form.password} onChangeText={update('password')} placeholder="Min 6 characters" secureTextEntry required />
-        <TouchableOpacity style={styles.termsRow} onPress={() => update('terms')(!form.terms)} activeOpacity={0.7}>
-          <View style={[styles.checkbox, form.terms && styles.checkboxChecked]}>
-            {form.terms && <Text style={styles.checkmark}>✓</Text>}
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: C.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        {/* Green header */}
+        <View style={{ backgroundColor: C.green, paddingTop: insets.top + 16, paddingBottom: 48, paddingHorizontal: 20 }}>
+          <TouchableOpacity onPress={() => router.back()} style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.15)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+            <MaterialCommunityIcons name="arrow-left" size={20} color="#fff" />
+          </TouchableOpacity>
+          <Text style={{ fontWeight: '800', fontSize: 26, color: '#fff' }}>Create account</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 }}>
+            <View style={{ backgroundColor: role === 'donor' ? 'rgba(255,255,255,0.2)' : 'rgba(245,158,11,0.3)', borderRadius: 99, paddingHorizontal: 12, paddingVertical: 4, borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' }}>
+              <Text style={{ fontSize: 12, fontWeight: '700', color: '#fff' }}>
+                {role === 'donor' ? 'Donor' : 'Recipient'}
+              </Text>
+            </View>
+            <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>account</Text>
           </View>
-          <Text style={styles.termsText}>
-            I agree to the <Text style={styles.link}>Terms & Conditions</Text> and <Text style={styles.link}>Privacy Policy</Text>.
-          </Text>
-        </TouchableOpacity>
-        <Btn fullWidth size="lg" variant="amber" onPress={submit} disabled={loading}>
-          {loading ? 'Creating…' : 'Create Account'}
-        </Btn>
-        <Text style={styles.loginText}>
+        </View>
+
+        {/* Form card */}
+        <View style={{ marginHorizontal: 20, marginTop: -24, backgroundColor: C.surface, borderRadius: 24, padding: 24, borderWidth: 1, borderColor: C.border, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 16, elevation: 4 }}>
+          <Input label="Full Name" value={form.name} onChangeText={update('name')} placeholder="Samaya Mahate" required />
+          <Input label="Email" value={form.email} onChangeText={update('email')} placeholder="hello@example.com" keyboardType="email-address" required />
+          <Input label="Phone Number" value={form.contact} onChangeText={update('contact')} placeholder="98XXXXXXXX" keyboardType="phone-pad" required />
+          <Input label="Password" value={form.password} onChangeText={update('password')} placeholder="Min 6 characters" secureTextEntry required />
+
+          <TouchableOpacity onPress={() => update('terms')(!form.terms)} activeOpacity={0.7} style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start', marginBottom: 24 }}>
+            <View style={{ width: 20, height: 20, borderRadius: 6, borderWidth: 2, borderColor: form.terms ? C.green : C.border, backgroundColor: form.terms ? C.green : 'transparent', marginTop: 1, flexShrink: 0, alignItems: 'center', justifyContent: 'center' }}>
+              {form.terms && <MaterialCommunityIcons name="check" size={13} color="#fff" />}
+            </View>
+            <Text style={{ fontSize: 13, color: C.textDark, flex: 1, lineHeight: 18 }}>
+              I agree to the <Text style={{ color: C.green, fontWeight: '700' }}>Terms & Conditions</Text> and <Text style={{ color: C.green, fontWeight: '700' }}>Privacy Policy</Text>.
+            </Text>
+          </TouchableOpacity>
+
+          <Btn fullWidth size="lg" variant="amber" onPress={submit} disabled={loading} loading={loading}>
+            {loading ? 'Creating…' : 'Create Account'}
+          </Btn>
+        </View>
+
+        <Text style={{ textAlign: 'center', fontSize: 14, color: C.textMid, marginTop: 20, paddingBottom: insets.bottom + 24 }}>
           Already have an account?{' '}
-          <Text style={styles.loginLink} onPress={() => router.push('/login' as any)}>Log in</Text>
+          <Text style={{ color: C.amber, fontWeight: '700' }} onPress={() => router.push('/login' as any)}>Log in</Text>
         </Text>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: C.bg },
-  scroll: { padding: 20, paddingBottom: 100 },
-  roleBadge: {
-    backgroundColor: C.tagAmber, borderRadius: 99, paddingVertical: 5, paddingHorizontal: 14,
-    alignSelf: 'flex-start', marginBottom: 24,
-  },
-  roleBadgeText: { fontSize: 12, fontWeight: '700', color: 'rgb(136,100,18)' },
-  termsRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', marginBottom: 24 },
-  checkbox: {
-    width: 18, height: 18, borderRadius: 4, borderWidth: 2, borderColor: C.border,
-    marginTop: 2, flexShrink: 0, alignItems: 'center', justifyContent: 'center',
-  },
-  checkboxChecked: { backgroundColor: C.green, borderColor: C.green },
-  checkmark: { color: '#fff', fontSize: 12, fontWeight: '700' },
-  termsText: { fontSize: 12, color: C.textDark, flex: 1, lineHeight: 18 },
-  link: { color: C.green, fontWeight: '700' },
-  loginText: { textAlign: 'center', fontSize: 14, color: C.textMid, marginTop: 20 },
-  loginLink: { color: C.amber, fontWeight: '700' },
-});

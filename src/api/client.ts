@@ -74,12 +74,19 @@ export const auth = {
 
 // Shared
 export const shared = {
-  uploadPhoto: (formData: FormData) =>
-    fetch(`${BASE_URL}/upload/photo`, {
+  uploadPhoto: async (formData: FormData) => {
+    const res = await fetch(`${BASE_URL}/upload/photo`, {
       method: 'POST',
-      headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
+      headers: {
+        'Accept': 'application/json',
+        ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+      },
       body: formData,
-    }).then(r => r.json()),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || 'Upload failed');
+    return json;
+  },
 };
 
 // Notifications (shared between donor and recipient)
