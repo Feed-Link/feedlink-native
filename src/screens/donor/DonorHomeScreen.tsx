@@ -9,7 +9,7 @@ import ListingCard from '../../components/ListingCard';
 import EmptyState from '../../components/EmptyState';
 import Spinner from '../../components/Spinner';
 import BottomNavBar, { DONOR_TABS } from '../../components/BottomNavBar';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function DonorHomeScreen() {
   const { user, showToast, unreadCount } = useApp();
@@ -83,13 +83,14 @@ export default function DonorHomeScreen() {
           {/* Stats cards */}
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 16 }}>
             {[
-              { label: 'Active', val: stats?.listings_active ?? '–' },
-              { label: 'Claimed', val: stats?.listings_completed ? stats.listings_active + 1 : '–' },
-              { label: 'Done', val: stats?.listings_completed ?? '–' },
+              { label: 'Active', val: stats?.listings_active ?? '–', icon: 'package-variant-outline' },
+              { label: 'Claimed', val: stats?.listings_completed ? stats.listings_active + 1 : '–', icon: 'hand-extended-outline' },
+              { label: 'Done', val: stats?.listings_completed ?? '–', icon: 'check-circle-outline' },
             ].map(s => (
-              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 8, alignItems: 'center' }}>
-                <Text style={{ fontWeight: '700', fontSize: 22, color: '#fff' }}>{s.val}</Text>
-                <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.8)', fontWeight: '500' }}>{s.label}</Text>
+              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 8, alignItems: 'center' }}>
+                <MaterialCommunityIcons name={s.icon as any} size={24} color="#fff" style={{ marginBottom: 6 }} />
+                <Text style={{ fontWeight: '700', fontSize: 20, color: '#fff' }}>{s.val}</Text>
+                <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.8)', fontWeight: '500', marginTop: 2 }}>{s.label}</Text>
               </View>
             ))}
           </View>
