@@ -15,6 +15,7 @@ import Btn from '../../components/Btn';
 const TABS = [
   { key: 'active', label: 'Active' },
   { key: 'claimed', label: 'Claimed' },
+  { key: 'expired', label: 'Expired' },
   { key: '', label: 'All' },
 ];
 
@@ -65,26 +66,25 @@ export default function DonorListingsScreen() {
           <Btn size="sm" onPress={() => router.push('/donor/create-listing' as any)} style={{ backgroundColor: C.green, color: '#fff' }}>+ New</Btn>
         </View>
         {/* Tab filter */}
-        <View style={{ flexDirection: 'row', backgroundColor: C.surface2, borderRadius: 99, padding: 3, marginBottom: 16, gap: 2 }}>
+        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
           {TABS.map(t => (
             <TouchableOpacity
               key={t.key}
               onPress={() => setTab(t.key)}
-              activeOpacity={0.85}
+              activeOpacity={0.7}
               style={{
-                flex: 1,
-                height: 30,
-                borderRadius: 99,
-                backgroundColor: tab === t.key ? C.surface : 'transparent',
+                paddingHorizontal: 14,
+                paddingVertical: 8,
+                borderRadius: 20,
+                backgroundColor: tab === t.key ? C.green : C.surface2,
                 justifyContent: 'center',
                 alignItems: 'center',
               }}
             >
               <Text style={{
                 fontSize: 13,
-                fontWeight: tab === t.key ? '700' : '400',
-                color: tab === t.key ? C.textDark : C.textLight,
-                fontFamily: 'Inter_400Regular',
+                fontWeight: tab === t.key ? '700' : '500',
+                color: tab === t.key ? '#fff' : C.textMid,
               }}>{t.label}</Text>
             </TouchableOpacity>
           ))}
