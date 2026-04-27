@@ -2,7 +2,7 @@ import { Stack } from 'expo-router/stack';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_800ExtraBold } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { AppProvider } from './src/context/AppContext';
+import { AppProvider } from '@/src/context/AppContext';
 import { StatusBar } from 'expo-status-bar';
 
 export default function RootLayout() {
