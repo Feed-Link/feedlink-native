@@ -84,7 +84,7 @@ export default function DonorHomeScreen() {
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 18 }}>
             {[
               { label: 'Active', val: stats?.listings_active ?? '–', icon: 'fire' },
-              { label: 'Claimed', val: stats?.listings_completed ? stats.listings_active + 1 : '–', icon: 'hands-together' },
+              { label: 'Claimed', val: stats?.listings_completed ? stats.listings_active + 1 : '–', icon: 'handshake' },
               { label: 'Done', val: stats?.listings_completed ?? '–', icon: 'check-decagram' },
             ].map(s => (
               <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 10, alignItems: 'center', justifyContent: 'center' }}>
