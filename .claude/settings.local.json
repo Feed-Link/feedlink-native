@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node scripts/reset-project.js)"
+      "Bash(node scripts/reset-project.js)",
+      "Bash(move \"app\\\\\\(donor\\)\" \"app\\\\donor\")",
+      "Bash(move \"app\\\\\\(recipient\\)\" \"app\\\\recipient\")"
     ]
   }
 }
