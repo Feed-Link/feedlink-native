@@ -95,7 +95,7 @@ export default function DonorListingsScreen() {
           <Spinner />
         ) : listings.length === 0 ? (
           <EmptyState
-            icon={<MaterialCommunityIcons name="clipboard-list-outline" size={40} color={C.textLight} />}
+            icon={<MaterialCommunityIcons name="inbox-outline" size={40} color={C.textLight} />}
             title="No listings"
             subtitle={tab ? `No ${tab} listings` : 'No listings yet'}
           />
