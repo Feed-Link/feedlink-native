@@ -27,7 +27,7 @@ export function clearTokens() {
   storage?.removeItem('fl_refresh_token');
 }
 
-async function request(path: string, options: RequestInit = {}) {
+export async function request(path: string, options: RequestInit = {}) {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string> || {}),
@@ -79,4 +79,11 @@ export const shared = {
       headers: accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {},
       body: formData,
     }).then(r => r.json()),
+};
+
+// Notifications (shared between donor and recipient)
+export const notifications = {
+  getNotifications: (query = '') => request(`/notifications${query}`),
+  markRead: (id: string) => request(`/notifications/${id}/read`, { method: 'PUT' }),
+  markAllRead: () => request('/notifications/read-all', { method: 'PUT' }),
 };

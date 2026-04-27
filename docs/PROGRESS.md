@@ -18,7 +18,7 @@ Resume guide at the bottom.
 - [x] Set up AsyncStorage auth helpers (token management in client.ts)
 - [x] Set up navigation skeleton (root stack + auth/donor/recipient groups)
 - [x] Set up AppContext (`src/context/AppContext.tsx`) — user, role, unreadCount, navigate, showToast, logout
-- [] Set up notification polling (30s interval in AppContext)
+- [x] Set up notification polling (30s interval in AppContext)
 
 ---
 
@@ -40,29 +40,29 @@ Resume guide at the bottom.
 - [x] `Btn` component (green, amber, red, outline variants, loading state)
 - [x] `Input` component (filled bg, label, required indicator, helper text)
 - [x] `ScreenHeader` (title, optional back button, safe-area top inset)
-- [] `BottomNavBar` — Donor variant (Home / Listings / Map / Alerts / Profile)
+- [x] `BottomNavBar` — Donor variant (Home / Listings / Map / Alerts / Profile)
 - [] `BottomNavBar` — Recipient variant (Home / Claims / Map / Requests / Profile)
-- [] `TextArea` (similar to Input but multi-line)
-- [] `TagChip` (audience + food state groups, multi-select)
-- [] `ListingCard` (thumbnail, title, quantity, tags, distance, status badge)
-- [] `StatusBadge` (active / claimed / completed / expired / cancelled)
-- [] `EmptyState` (icon in rounded container + message)
-- [] `Spinner` / loading overlay
-- [] `LocationPickerModal` (map + search + GPS + reverse geocode)
-- [] `NotifPagination` (prev/next + page pills)
+- [x] `TextArea` (similar to Input but multi-line)
+- [x] `TagChip` (audience + food state groups, multi-select)
+- [x] `ListingCard` (thumbnail, title, quantity, tags, distance, status badge)
+- [x] `StatusBadge` (active / claimed / completed / expired / cancelled)
+- [x] `EmptyState` (icon in rounded container + message)
+- [x] `Spinner` / loading overlay
+- [x] `LocationPickerModal` (map + search + GPS + reverse geocode)
+- [x] `NotifPagination` (prev/next + page pills)
 
 ---
 
 ## Donor Screens
 
-- [] Donor Home (stats card + active listings feed)
-- [] My Listings (filter tabs: active/claimed/completed/expired/cancelled, pagination)
-- [] Create Listing (title, desc, quantity, tags, photos ×4, location picker, expires_at, pickup_before, pickup_instructions)
-- [] Listing Detail — Donor (photo gallery/hero, claims list, confirm/reject claim, cancel listing, reopen listing)
-- [] Donor Map (nearby food requests as markers, tap → popup → navigate to detail)
-- [] Donor Notifications (paginated list, mark read, mark all read)
-- [] Donor Profile (stats summary, edit link, logout)
-- [] Edit Profile (name, contact, profile photo)
+- [x] Donor Home (stats card + active listings feed)
+- [x] My Listings (filter tabs: active/claimed/completed/expired/cancelled, pagination)
+- [x] Create Listing (title, desc, quantity, tags, photos ×4, location picker, expires_at, pickup_before, pickup_instructions)
+- [x] Listing Detail — Donor (photo gallery/hero, claims list, confirm/reject claim, cancel listing, reopen listing)
+- [x] Donor Map (nearby food requests as markers, tap → popup → navigate to detail)
+- [x] Donor Notifications (paginated list, mark read, mark all read)
+- [x] Donor Profile (stats summary, edit link, logout)
+- [x] Edit Profile (name, contact)
 
 ---
 

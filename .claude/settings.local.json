@@ -3,7 +3,9 @@
     "allow": [
       "Bash(node scripts/reset-project.js)",
       "Bash(move \"app\\\\\\(donor\\)\" \"app\\\\donor\")",
-      "Bash(move \"app\\\\\\(recipient\\)\" \"app\\\\recipient\")"
+      "Bash(move \"app\\\\\\(recipient\\)\" \"app\\\\recipient\")",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "Bash(npx expo *)"
     ]
   }
 }
