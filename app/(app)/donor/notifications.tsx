@@ -1,2 +1,2 @@
-import DonorNotificationsScreen from '../../src/screens/donor/DonorNotificationsScreen';
+import DonorNotificationsScreen from '../../../src/screens/donor/DonorNotificationsScreen';
 export default DonorNotificationsScreen;

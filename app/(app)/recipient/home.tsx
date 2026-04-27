@@ -1,5 +1,5 @@
 import { View, Text } from 'react-native';
-import { C } from '../../src/theme';
+import { C } from '../../../src/theme';
 
 export default function RecipientHome() {
   return (

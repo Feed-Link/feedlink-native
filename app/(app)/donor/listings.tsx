@@ -1,2 +1,2 @@
-import DonorListingsScreen from '../../src/screens/donor/DonorListingsScreen';
+import DonorListingsScreen from '../../../src/screens/donor/DonorListingsScreen';
 export default DonorListingsScreen;

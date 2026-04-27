@@ -1,2 +1,2 @@
-import DonorMapScreen from '../../src/screens/donor/DonorMapScreen';
+import DonorMapScreen from '../../../src/screens/donor/DonorMapScreen';
 export default DonorMapScreen;
