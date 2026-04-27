@@ -1,9 +1,10 @@
 import React from 'react';
-import { useState, useCallback, ReactNode } from 'react';
+import { useState, useCallback, ReactNode, useRef } from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import { ToastItem } from '../components/Toast';
 import useToast from '../hooks/useToast';
 import * as api from '../api/client';
+import { notifications } from '../api/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 api.setStorage({
@@ -45,6 +46,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await AsyncStorage.removeItem('fl_user');
     setUser(null);
     setRole(null);
+    setUnreadCount(0);
     router.replace('/onboarding' as any);
   }, []);
 
@@ -66,6 +68,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
     check();
   }, []);
+
+  // Notification polling every 30 seconds
+  React.useEffect(() => {
+    if (!api.getToken()) return;
+
+    const pollNotifications = async () => {
+      try {
+        const res = await notifications.list({ per_page: 1 });
+        const newCount = res.meta?.unread_count ?? 0;
+        const isOnNotificationsScreen = segments.some(s => s === 'notifications');
+
+        if (newCount > unreadCount && !isOnNotificationsScreen) {
+          show(`You have ${newCount} new notification${newCount > 1 ? 's' : ''}`, 'info');
+        }
+        setUnreadCount(newCount);
+      } catch (_) {
+        // silently fail on poll errors
+      }
+    };
+
+    pollNotifications();
+    const interval = setInterval(pollNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [unreadCount, segments]);
+
+  // Reset badge when entering notifications screen
+  React.useEffect(() => {
+    if (segments.some(s => s === 'notifications')) {
+      setUnreadCount(0);
+    }
+  }, [segments]);
 
   return (
     <AppContext.Provider value={{ user, setUser, role, setRole, toasts, showToast: show, logout, unreadCount, setUnreadCount }}>
