@@ -12,16 +12,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const ICONS: Record<string, { icon: string; color: string; bgColor: string }> = {
-  claim_received: { icon: 'package-variant-closed', color: C.green, bgColor: '#dcfce7' },
-  claim_confirmed: { icon: 'check-circle-outline', color: C.green, bgColor: '#dcfce7' },
-  claim_rejected: { icon: 'close-circle-outline', color: C.red, bgColor: '#fee2e2' },
-  pickup_completed: { icon: 'check-decagram', color: C.green, bgColor: '#dcfce7' },
-  listing_expired_uncollected: { icon: 'clock-alert-outline', color: C.amber, bgColor: '#fef3c7' },
-  request_accepted: { icon: 'handshake', color: C.green, bgColor: '#dcfce7' },
-  acceptance_confirmed: { icon: 'heart-circle-outline', color: C.green, bgColor: '#dcfce7' },
-  acceptance_rejected: { icon: 'heart-broken-outline', color: C.red, bgColor: '#fee2e2' },
-  listing_cancelled: { icon: 'trash-can-outline', color: C.red, bgColor: '#fee2e2' },
-  listing_reopened: { icon: 'refresh-circle', color: C.green, bgColor: '#dcfce7' },
+  claim_received: { icon: 'package-variant-closed-outline', color: C.green, bgColor: C.surface2 },
+  claim_confirmed: { icon: 'check-circle-outline', color: C.green, bgColor: C.surface2 },
+  claim_rejected: { icon: 'close-circle-outline', color: C.red, bgColor: C.surface2 },
+  pickup_completed: { icon: 'check-circle-outline', color: C.green, bgColor: C.surface2 },
+  listing_expired_uncollected: { icon: 'clock-alert-outline', color: C.amber, bgColor: C.surface2 },
+  request_accepted: { icon: 'handshake-outline', color: C.green, bgColor: C.surface2 },
+  acceptance_confirmed: { icon: 'heart-outline', color: C.green, bgColor: C.surface2 },
+  acceptance_rejected: { icon: 'heart-broken-outline', color: C.red, bgColor: C.surface2 },
+  listing_cancelled: { icon: 'trash-can-outline', color: C.red, bgColor: C.surface2 },
+  listing_reopened: { icon: 'refresh-circle-outline', color: C.green, bgColor: C.surface2 },
 };
 
 const PER_PAGE = 15;
@@ -103,7 +103,7 @@ export default function DonorNotificationsScreen() {
           ) : items.length === 0 ? (
             <EmptyState
               icon={
-                <View style={{ alignItems: 'center', justifyContent: 'center', width: 72, height: 72, borderRadius: 24, backgroundColor: '#dcfce7' }}>
+                <View style={{ alignItems: 'center', justifyContent: 'center', width: 72, height: 72, borderRadius: 24, backgroundColor: C.surface2 }}>
                   <MaterialCommunityIcons name="bell-off-outline" size={40} color={C.green} />
                 </View>
               }
