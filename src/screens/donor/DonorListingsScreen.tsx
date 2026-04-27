@@ -10,7 +10,7 @@ import EmptyState from '../../components/EmptyState';
 import Spinner from '../../components/Spinner';
 import NotifPagination from '../../components/NotifPagination';
 import BottomNavBar, { DONOR_TABS } from '../../components/BottomNavBar';
-import Btn from '../../components/Btn';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const TABS = [
   { key: 'active', label: 'Active' },
@@ -61,9 +61,8 @@ export default function DonorListingsScreen() {
       >
         {/* Header */}
         <View style={{ paddingTop: insets.top + 12, paddingHorizontal: 16, backgroundColor: C.bg }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+        <View style={{ marginBottom: 14 }}>
           <Text style={{ fontWeight: '700', fontSize: 20, color: C.textDark }}>My Listings</Text>
-          <Btn size="sm" onPress={() => router.push('/donor/create-listing' as any)} style={{ backgroundColor: C.green, color: '#fff' }}>+ New</Btn>
         </View>
         {/* Tab filter */}
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
@@ -111,6 +110,29 @@ export default function DonorListingsScreen() {
         )}
       </View>
       </ScrollView>
+
+      {/* FAB Button */}
+      <TouchableOpacity
+        onPress={() => router.push('/donor/create-listing' as any)}
+        activeOpacity={0.7}
+        style={{
+          position: 'absolute',
+          bottom: 100 + insets.bottom,
+          right: 16,
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          backgroundColor: C.green,
+          alignItems: 'center',
+          justifyContent: 'center',
+          shadowColor: '#000',
+          shadowOpacity: 0.3,
+          shadowRadius: 6,
+          elevation: 5,
+        }}
+      >
+        <MaterialCommunityIcons name="plus" size={28} color="#fff" />
+      </TouchableOpacity>
 
       {/* Bottom nav */}
       <BottomNavBar tabs={DONOR_TABS} active="/donor/listings" />
