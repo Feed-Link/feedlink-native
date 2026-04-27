@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router/stack';
+import { Slot } from 'expo-router';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_800ExtraBold } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
@@ -21,7 +21,7 @@ export default function RootLayout() {
   return (
     <AppProvider>
       <StatusBar style="auto" />
-      <Stack screenOptions={{ headerShown: false }} />
+      <Slot />
     </AppProvider>
   );
 }
