@@ -11,17 +11,17 @@ import BottomNavBar, { DONOR_TABS } from '../../components/BottomNavBar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const ICONS: Record<string, { icon: string; color: string }> = {
-  claim_received: { icon: 'package-variant', color: C.green },
-  claim_confirmed: { icon: 'check-circle', color: C.green },
-  claim_rejected: { icon: 'close-circle', color: C.red },
-  pickup_completed: { icon: 'check-all', color: C.green },
-  listing_expired_uncollected: { icon: 'clock-alert', color: C.amber },
-  request_accepted: { icon: 'handshake', color: C.green },
-  acceptance_confirmed: { icon: 'check-circle', color: C.green },
-  acceptance_rejected: { icon: 'close-circle', color: C.red },
-  listing_cancelled: { icon: 'trash-can', color: C.red },
-  listing_reopened: { icon: 'refresh', color: C.green },
+const ICONS: Record<string, { icon: string; color: string; bgColor: string }> = {
+  claim_received: { icon: 'package-variant-closed', color: '#fff', bgColor: C.green },
+  claim_confirmed: { icon: 'check-circle-outline', color: '#fff', bgColor: C.green },
+  claim_rejected: { icon: 'close-circle-outline', color: '#fff', bgColor: C.red },
+  pickup_completed: { icon: 'check-decagram', color: '#fff', bgColor: C.green },
+  listing_expired_uncollected: { icon: 'clock-alert-outline', color: '#fff', bgColor: C.amber },
+  request_accepted: { icon: 'handshake', color: '#fff', bgColor: C.green },
+  acceptance_confirmed: { icon: 'heart-circle-outline', color: '#fff', bgColor: C.green },
+  acceptance_rejected: { icon: 'heart-broken-outline', color: '#fff', bgColor: C.red },
+  listing_cancelled: { icon: 'trash-can-outline', color: '#fff', bgColor: C.red },
+  listing_reopened: { icon: 'refresh-circle', color: '#fff', bgColor: C.green },
 };
 
 const PER_PAGE = 15;
@@ -101,10 +101,10 @@ export default function DonorNotificationsScreen() {
           {loading ? (
             <Spinner />
           ) : items.length === 0 ? (
-            <EmptyState icon={<MaterialCommunityIcons name="bell-off" size={36} color={C.textLight} />} title="No notifications" subtitle="You're all caught up!" />
+            <EmptyState icon={<MaterialCommunityIcons name="bell-off-outline" size={40} color={C.green} />} title="No notifications" subtitle="You're all caught up!" />
           ) : (
             items.map((n: any) => {
-              const iconDef = ICONS[n.type] || { icon: 'bell', color: C.textMid };
+              const iconDef = ICONS[n.type] || { icon: 'bell-outline', color: '#fff', bgColor: C.textMid };
               return (
                 <TouchableOpacity
                   key={n.id}
@@ -123,11 +123,15 @@ export default function DonorNotificationsScreen() {
                   }}
                 >
                   <View style={{
-                    width: 44, height: 44, borderRadius: 10,
-                    backgroundColor: n.read_at ? C.surface2 : `${iconDef.color}15`,
+                    width: 48, height: 48, borderRadius: 12,
+                    backgroundColor: n.read_at ? C.surface2 : iconDef.bgColor,
                     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                   }}>
-                    <MaterialCommunityIcons name={iconDef.icon as any} size={22} color={n.read_at ? C.textLight : iconDef.color} />
+                    <MaterialCommunityIcons
+                      name={iconDef.icon as any}
+                      size={26}
+                      color={n.read_at ? C.textLight : iconDef.color}
+                    />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontWeight: '600', fontSize: 14, color: C.textDark, marginBottom: 4 }}>{n.title}</Text>
