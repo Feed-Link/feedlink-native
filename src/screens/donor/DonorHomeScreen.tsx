@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useApp } from '../../context/AppContext';
@@ -35,6 +35,15 @@ export default function DonorHomeScreen() {
   }, []);
 
   const name = user?.name?.split(' ')[0] || 'there';
+  const scaleAnims = React.useRef([new Animated.Value(1), new Animated.Value(1), new Animated.Value(1)]).current;
+
+  const handleStatPress = (index: number, status: string) => {
+    Animated.sequence([
+      Animated.timing(scaleAnims[index], { toValue: 0.95, duration: 80, useNativeDriver: true }),
+      Animated.timing(scaleAnims[index], { toValue: 1, duration: 80, useNativeDriver: true }),
+    ]).start();
+    router.push(`/donor/listings?status=${status}` as any);
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
@@ -83,15 +92,27 @@ export default function DonorHomeScreen() {
           {/* Stats cards */}
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 18 }}>
             {[
-              { label: 'Active', val: stats?.listings_active ?? '–', icon: 'fire' },
-              { label: 'Claimed', val: stats?.listings_completed ? stats.listings_active + 1 : '–', icon: 'handshake' },
-              { label: 'Done', val: stats?.listings_completed ?? '–', icon: 'check-decagram' },
+              { label: 'Active', val: stats?.listings_active ?? '–', icon: 'fire', status: 'active', index: 0 },
+              { label: 'Claimed', val: stats?.listings_completed ? stats.listings_active + 1 : '–', icon: 'handshake', status: 'claimed', index: 1 },
+              { label: 'Done', val: stats?.listings_completed ?? '–', icon: 'check-decagram', status: 'completed', index: 2 },
             ].map(s => (
-              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 10, alignItems: 'center', justifyContent: 'center' }}>
-                <MaterialCommunityIcons name={s.icon as any} size={26} color="#fff" style={{ marginBottom: 8 }} />
-                <Text style={{ fontWeight: '800', fontSize: 22, color: '#fff', lineHeight: 24 }}>{s.val}</Text>
-                <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)', fontWeight: '600', marginTop: 4 }}>{s.label}</Text>
-              </View>
+              <Animated.View
+                key={s.label}
+                style={{
+                  flex: 1,
+                  transform: [{ scale: scaleAnims[s.index] }],
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => handleStatPress(s.index, s.status)}
+                  activeOpacity={0.8}
+                  style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 10, alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <MaterialCommunityIcons name={s.icon as any} size={26} color="#fff" style={{ marginBottom: 8 }} />
+                  <Text style={{ fontWeight: '800', fontSize: 22, color: '#fff', lineHeight: 24 }}>{s.val}</Text>
+                  <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)', fontWeight: '600', marginTop: 4 }}>{s.label}</Text>
+                </TouchableOpacity>
+              </Animated.View>
             ))}
           </View>
         </View>
