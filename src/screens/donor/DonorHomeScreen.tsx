@@ -129,7 +129,7 @@ export default function DonorHomeScreen() {
             }}
           >
             <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: C.tagGreen, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Text style={{ fontSize: 22 }}>➕</Text>
+              <MaterialCommunityIcons name="plus" size={24} color={C.green} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontWeight: '700', fontSize: 14, color: C.textDark }}>Post new listing</Text>
@@ -149,7 +149,7 @@ export default function DonorHomeScreen() {
           {loading ? (
             <Spinner />
           ) : listings.length === 0 ? (
-            <EmptyState icon={<Ionicons name="storefront-outline" size={36} color={C.textLight} />} title="No active listings" subtitle="Post your first listing to get started" />
+            <EmptyState icon={<MaterialCommunityIcons name="inbox-outline" size={40} color={C.textLight} />} title="No active listings" subtitle="Post your first listing to get started" />
           ) : (
             listings.map((l: any) => (
               <ListingCard
