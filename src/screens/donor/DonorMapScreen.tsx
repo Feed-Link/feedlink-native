@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useApp } from '../../context/AppContext';
 import { C } from '../../theme';
 import { donor } from '../../api/donor';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import MapView, { Marker } from 'react-native-maps';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import BottomNavBar, { DONOR_TABS } from '../../components/BottomNavBar';
 import Avatar from '../../components/Avatar';
 import Btn from '../../components/Btn';
@@ -30,7 +30,6 @@ export default function DonorMapScreen() {
   const [filter, setFilter] = React.useState('');
   const [offerTarget, setOfferTarget] = React.useState<any>(null);
   const [offerNote, setOfferNote] = React.useState('');
-  const mapRef = React.useRef<any>(null);
 
   const load = async () => {
     setLoading(true);
@@ -82,23 +81,11 @@ export default function DonorMapScreen() {
         </View>
       </View>
 
-      {/* Map */}
-      <View style={{ height: 280, backgroundColor: C.surface2, marginTop: 10 }}>
-        <MapView
-          ref={mapRef}
-          style={{ flex: 1 }}
-          initialRegion={{ latitude: lat, longitude: lng, latitudeDelta: 0.05, longitudeDelta: 0.05 }}
-        >
-          {requests.map((r: any) => r.latitude && r.longitude && (
-            <Marker
-              key={r.id}
-              coordinate={{ latitude: r.latitude, longitude: r.longitude }}
-              title={r.title}
-              description={`${r.quantity_needed || ''} • ${r.address || ''}`}
-              onCalloutPress={() => router.push(`/recipient/request-detail?id=${r.id}` as any)}
-            />
-          ))}
-        </MapView>
+      {/* Map placeholder */}
+      <View style={{ height: 280, backgroundColor: C.surface2, marginTop: 10, alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <MaterialCommunityIcons name="map-marker-radius" size={48} color={C.green} />
+        <Text style={{ fontSize: 14, color: C.textMid, fontWeight: '600' }}>Map requires a dev build</Text>
+        <Text style={{ fontSize: 12, color: C.textLight }}>{requests.length} requests nearby</Text>
       </View>
 
       {/* List */}

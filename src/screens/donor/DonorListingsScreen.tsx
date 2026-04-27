@@ -60,12 +60,12 @@ export default function DonorListingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={{ paddingTop: insets.top + 12, paddingHorizontal: 16, backgroundColor: C.bg }}>
-        <View style={{ marginBottom: 14 }}>
+        <View style={{ paddingTop: insets.top + 12, paddingHorizontal: 16, paddingBottom: 20, backgroundColor: C.bg }}>
+        <View style={{ marginBottom: 18 }}>
           <Text style={{ fontWeight: '700', fontSize: 20, color: C.textDark }}>My Listings</Text>
         </View>
         {/* Tab filter */}
-        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+        <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
           {TABS.map(t => (
             <TouchableOpacity
               key={t.key}
@@ -90,7 +90,7 @@ export default function DonorListingsScreen() {
         </View>
       </View>
 
-      <View style={{ flex: 1, paddingHorizontal: 16 }}>
+      <View style={{ flex: 1, paddingHorizontal: 16, paddingTop: 8 }}>
         {loading ? (
           <Spinner />
         ) : listings.length === 0 ? (
@@ -121,8 +121,8 @@ export default function DonorListingsScreen() {
         activeOpacity={0.7}
         style={{
           position: 'absolute',
-          bottom: 85 + insets.bottom,
-          right: 20,
+          bottom: 90 + insets.bottom,
+          right: 16,
           width: 56,
           height: 56,
           borderRadius: 28,

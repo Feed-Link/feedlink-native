@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, FlatList, Image, Dimensions } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useApp } from '../../context/AppContext';
 import { C } from '../../theme';
@@ -11,6 +11,9 @@ import Btn from '../../components/Btn';
 import ConfirmModal from '../../components/ConfirmModal';
 import BottomNavBar, { DONOR_TABS } from '../../components/BottomNavBar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+const { width } = Dimensions.get('window');
 
 export default function DonorListingDetailScreen() {
   const { showToast } = useApp();
@@ -72,14 +75,17 @@ export default function DonorListingDetailScreen() {
     } catch (e: any) { showToast(e.message || 'Failed', 'error'); }
   };
 
+  const BOTTOM_NAV_HEIGHT = 60;
+  const canCancel = listing?.status === 'active' || listing?.status === 'claimed';
+
   if (loading) return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Loading...</Text>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: C.bg }}>
+      <MaterialCommunityIcons name="loading" size={32} color={C.textLight} />
     </View>
   );
 
   if (!listing) return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: C.bg }}>
       <Text style={{ fontSize: 17, color: C.textDark, fontWeight: '700' }}>Listing not found</Text>
     </View>
   );
@@ -89,76 +95,117 @@ export default function DonorListingDetailScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
+      <ScreenHeader title="Listing detail" onBack={() => router.push('/donor/listings' as any)} />
+
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 100 + insets.bottom }}
+        contentContainerStyle={{ paddingBottom: BOTTOM_NAV_HEIGHT + insets.bottom + (canCancel ? 80 : 0) }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero / Photo gallery */}
-        {listing.photos && listing.photos.length > 1 ? (
+        {/* Photo */}
+        {listing.photos?.length > 1 ? (
           <FlatList
             data={listing.photos}
-            horizontal
-            pagingEnabled
+            horizontal pagingEnabled
             showsHorizontalScrollIndicator={false}
             keyExtractor={(_, i) => String(i)}
             renderItem={({ item }) => (
-              <View style={{ width: Dimensions.width, height: 220 }}>
-                <Image source={{ uri: item }} style={{ width: '100%', height: 220 }} resizeMode="cover" />
-              </View>
+              <Image source={{ uri: item }} style={{ width, height: 220 }} resizeMode="cover" />
             )}
           />
+        ) : listing.photos?.[0] ? (
+          <Image source={{ uri: listing.photos[0] }} style={{ width: '100%', height: 220 }} resizeMode="cover" />
         ) : (
-          <View style={{ height: 200, backgroundColor: listing.photos?.[0] ? 'transparent' : C.tagAmber, alignItems: 'center', justifyContent: 'center', fontSize: 64, overflow: 'hidden' }}>
-            {listing.photos?.[0] ? (
-              <Image source={{ uri: listing.photos[0] }} style={{ width: '100%', height: 200 }} resizeMode="cover" />
-            ) : (
-              <Text style={{ fontSize: 64 }}>🌾</Text>
-            )}
+          <View style={{ height: 180, backgroundColor: C.tagAmber, alignItems: 'center', justifyContent: 'center' }}>
+            <MaterialCommunityIcons name="food" size={64} color="rgb(180,120,40)" />
           </View>
         )}
 
         <View style={{ padding: 16 }}>
+          {/* Title + status */}
           <Text style={{ fontWeight: '700', fontSize: 22, color: C.textDark, marginBottom: 8 }}>{listing.title}</Text>
-          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', marginBottom: 14, flexWrap: 'wrap' }}>
             <StatusBadge status={listing.status} />
-            {listing.quantity && <Text style={{ fontSize: 13, color: C.textMid }}>{listing.quantity}</Text>}
+            {listing.quantity && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <MaterialCommunityIcons name="package-variant" size={14} color={C.textMid} />
+                <Text style={{ fontSize: 13, color: C.textMid }}>{listing.quantity}</Text>
+              </View>
+            )}
           </View>
 
           {/* Info card */}
-          <View style={{ backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, borderRadius: 12, padding: 12, marginBottom: 12 }}>
-            {listing.address && <Text style={{ fontSize: 13, color: C.textMid, marginBottom: 6 }}>📍 {listing.address}</Text>}
+          <View style={{ backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, borderRadius: 14, padding: 14, marginBottom: 14, gap: 10 }}>
+            {listing.address && (
+              <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+                <MaterialCommunityIcons name="map-marker-outline" size={16} color={C.green} style={{ marginTop: 1 }} />
+                <Text style={{ fontSize: 13, color: C.textDark, flex: 1, fontWeight: '500' }}>{listing.address}</Text>
+              </View>
+            )}
             {listing.expires_at && (
-              <Text style={{ fontSize: 13, color: C.textMid, marginBottom: 6 }}>⏱ Expires {new Date(listing.expires_at).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <MaterialCommunityIcons name="clock-outline" size={16} color={C.amber} />
+                <Text style={{ fontSize: 13, color: C.textMid }}>
+                  Expires {new Date(listing.expires_at).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </Text>
+              </View>
             )}
             {listing.pickup_before && (
-              <Text style={{ fontSize: 13, color: C.textMid }}>🚶 Pickup before {new Date(listing.pickup_before).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <MaterialCommunityIcons name="walk" size={16} color={C.blue} />
+                <Text style={{ fontSize: 13, color: C.textMid }}>
+                  Pickup before {new Date(listing.pickup_before).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </Text>
+              </View>
+            )}
+            {listing.pickup_instructions && (
+              <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+                <MaterialCommunityIcons name="information-outline" size={16} color={C.textMid} style={{ marginTop: 1 }} />
+                <Text style={{ fontSize: 13, color: C.textMid, flex: 1 }}>{listing.pickup_instructions}</Text>
+              </View>
             )}
           </View>
 
-          {/* Claims */}
+          {/* Pending claims */}
           {listing.status === 'active' && (
-            <View>
-              <Text style={{ fontWeight: '700', fontSize: 15, color: C.textDark, marginBottom: 10 }}>Pending requests ({pending.length})</Text>
+            <View style={{ marginBottom: 14 }}>
+              <Text style={{ fontWeight: '700', fontSize: 15, color: C.textDark, marginBottom: 10 }}>
+                Pending requests ({pending.length})
+              </Text>
               {pending.length === 0 ? (
-                <Text style={{ fontSize: 13, color: C.textMid, marginBottom: 12 }}>No requests yet.</Text>
+                <Text style={{ fontSize: 13, color: C.textMid }}>No requests yet.</Text>
               ) : (
                 pending.map((claim: any) => (
                   <View key={claim.id} style={{ backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, borderRadius: 12, padding: 12, marginBottom: 10 }}>
                     <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 8 }}>
                       <Avatar name={claim.recipient?.name} size={40} />
-                      <View>
+                      <View style={{ flex: 1 }}>
                         <Text style={{ fontWeight: '700', fontSize: 14, color: C.textDark }}>{claim.recipient?.name}</Text>
-                        {claim.recipient?.is_verified && <Text style={{ fontSize: 11, color: C.green }}>✓ Verified</Text>}
+                        {claim.recipient?.is_verified && (
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                            <MaterialCommunityIcons name="check-circle" size={12} color={C.green} />
+                            <Text style={{ fontSize: 11, color: C.green }}>Verified</Text>
+                          </View>
+                        )}
                       </View>
                       <StatusBadge status={claim.status} />
                     </View>
                     {claim.note && <Text style={{ fontSize: 12, color: C.textMid, marginBottom: 10 }}>{claim.note}</Text>}
                     <View style={{ flexDirection: 'row', gap: 8 }}>
-                      <Btn size="sm" onPress={() => doConfirm(claim.id)} style={{ backgroundColor: C.green, color: '#fff', flex: 1 }}>✓ Confirm</Btn>
-                      <Btn size="sm" variant="outline" onPress={() => doReject(claim.id)} style={{ flex: 1 }}>
-                        <Text style={{ color: C.red }}>✗ Reject</Text>
-                      </Btn>
+                      <TouchableOpacity
+                        onPress={() => doConfirm(claim.id)}
+                        style={{ flex: 1, height: 36, borderRadius: 99, backgroundColor: C.green, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                      >
+                        <MaterialCommunityIcons name="check" size={16} color="#fff" />
+                        <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>Confirm</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => doReject(claim.id)}
+                        style={{ flex: 1, height: 36, borderRadius: 99, backgroundColor: C.surface, borderWidth: 1.5, borderColor: 'rgb(250,202,202)', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                      >
+                        <MaterialCommunityIcons name="close" size={16} color={C.red} />
+                        <Text style={{ fontSize: 13, fontWeight: '700', color: C.red }}>Reject</Text>
+                      </TouchableOpacity>
                     </View>
                   </View>
                 ))
@@ -166,39 +213,48 @@ export default function DonorListingDetailScreen() {
             </View>
           )}
 
+          {/* Confirmed recipient */}
           {confirmed && (
             <View style={{ backgroundColor: C.tagGreen, borderWidth: 1, borderColor: C.green, borderRadius: 12, padding: 12, marginBottom: 12 }}>
-              <Text style={{ fontSize: 11, fontWeight: '700', color: C.green, marginBottom: 6, textTransform: 'uppercase' }}>CONFIRMED RECIPIENT</Text>
+              <Text style={{ fontSize: 11, fontWeight: '700', color: C.green, marginBottom: 8, textTransform: 'uppercase' }}>Confirmed Recipient</Text>
               <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
                 <Avatar name={confirmed.recipient?.name} size={40} color={C.green} />
-                <View>
+                <View style={{ flex: 1 }}>
                   <Text style={{ fontWeight: '700', fontSize: 14, color: C.textDark }}>{confirmed.recipient?.name}</Text>
                   {confirmed.note && <Text style={{ fontSize: 12, color: C.textMid }}>{confirmed.note}</Text>}
                 </View>
               </View>
               {listing.status === 'claimed' && (
-                <Btn size="sm" onPress={() => setConfirmModal('reopen')} style={{ marginTop: 10, backgroundColor: C.amber, color: '#fff' }}>Reopen listing</Btn>
+                <TouchableOpacity
+                  onPress={() => setConfirmModal('reopen')}
+                  style={{ marginTop: 10, height: 36, borderRadius: 99, backgroundColor: C.amber, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                >
+                  <MaterialCommunityIcons name="refresh" size={16} color="#fff" />
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: '#fff' }}>Reopen listing</Text>
+                </TouchableOpacity>
               )}
             </View>
           )}
         </View>
       </ScrollView>
 
-      {/* Bottom bar */}
-      {(listing.status === 'active' || listing.status === 'claimed') && (
+      {/* Cancel button — sits above bottom nav */}
+      {canCancel && (
         <View style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0,
-          backgroundColor: C.surface, borderTopWidth: 1, borderTopColor: C.border,
-          padding: 12, paddingBottom: 12 + insets.bottom,
+          position: 'absolute',
+          bottom: BOTTOM_NAV_HEIGHT + insets.bottom,
+          left: 0, right: 0,
+          backgroundColor: C.surface,
+          borderTopWidth: 1, borderTopColor: C.border,
+          padding: 12,
         }}>
-          <Btn
-            variant="outline"
-            fullWidth
+          <TouchableOpacity
             onPress={() => setConfirmModal('cancel')}
-            style={{ borderColor: C.border }}
+            style={{ height: 48, borderRadius: 12, borderWidth: 1.5, borderColor: 'rgb(250,202,202)', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: C.surface }}
           >
-            <Text style={{ color: C.red }}>🗑 Cancel listing</Text>
-          </Btn>
+            <MaterialCommunityIcons name="trash-can-outline" size={18} color={C.red} />
+            <Text style={{ fontSize: 15, fontWeight: '700', color: C.red }}>Cancel listing</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -223,7 +279,6 @@ export default function DonorListingDetailScreen() {
         />
       )}
 
-      {/* Bottom nav */}
       <BottomNavBar tabs={DONOR_TABS} active="/donor/listings" />
     </View>
   );

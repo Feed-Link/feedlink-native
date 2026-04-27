@@ -1,7 +1,7 @@
 import React from 'react';
 import { useState, useCallback, ReactNode, useRef } from 'react';
 import { useRouter, useSegments } from 'expo-router';
-import { ToastItem } from '../components/Toast';
+import { Toast, ToastItem } from '../components/Toast';
 import useToast from '../hooks/useToast';
 import * as api from '../api/client';
 import { notifications } from '../api/client';
@@ -103,6 +103,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={{ user, setUser, role, setRole, toasts, showToast: show, logout, unreadCount, setUnreadCount }}>
       {children}
+      <Toast toasts={toasts} />
     </AppContext.Provider>
   );
 }

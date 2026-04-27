@@ -28,6 +28,7 @@ export default function ConfirmModal({ title, message, confirmLabel = 'Confirm',
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         padding: 24,
+        paddingBottom: 48,
       }}>
         <Text style={{ fontWeight: '700', fontSize: 17, color: C.textDark, marginBottom: 8 }}>{title}</Text>
         <Text style={{ fontSize: 14, color: C.textMid, marginBottom: 24 }}>{message}</Text>

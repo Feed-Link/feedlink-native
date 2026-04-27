@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, Platform, Image, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useApp } from '../../context/AppContext';
 import { C } from '../../theme';
@@ -33,6 +33,7 @@ export default function DonorCreateListingScreen() {
   const [showLocationPicker, setShowLocationPicker] = React.useState(false);
   const [showExpiryPicker, setShowExpiryPicker] = React.useState(false);
   const [showPickupPicker, setShowPickupPicker] = React.useState(false);
+  const [tempDate, setTempDate] = React.useState<Date>(new Date());
 
   const set = (k: string) => (v: any) => setForm(p => ({ ...p, [k]: v }));
   const toggleTag = (tag: string) => setForm(p => ({
@@ -55,18 +56,34 @@ export default function DonorCreateListingScreen() {
     return `${val}:00${sign}${hh}:${mm}`;
   };
 
+  const toLocalSlice = (d: Date) => {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  const formatDate = (iso: string) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      + ' · '
+      + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  };
+
   const handlePhotoSelect = async () => {
     const remaining = MAX_PHOTOS - photosPreviews.length;
     if (remaining <= 0) { showToast('Maximum 4 photos allowed', 'error'); return; }
     try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        showToast('Photo library permission is required', 'error');
+        return;
+      }
       const res = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
+        mediaTypes: 'images',
+        allowsEditing: true,
         quality: 0.8,
-        allowsMultipleSelection: true,
-        selectionLimit: remaining,
       });
-      if (res.canceled) return;
+      if (res.canceled || !res.assets?.length) return;
       const newFiles = res.assets.slice(0, remaining);
       const placeholders = newFiles.map(f => ({ uri: f.uri, uploading: true, cloudUrl: null, error: false }));
       setPhotosPreviews(p => [...p, ...placeholders]);
@@ -133,7 +150,7 @@ export default function DonorCreateListingScreen() {
             {photosPreviews.map((photo, idx) => (
               <View key={idx} style={{ position: 'relative', width: 72, height: 72 }}>
                 {photo.cloudUrl ? (
-                  <ImagePicker.Image key={photo.cloudUrl} source={{ uri: photo.uri }} style={{ width: 72, height: 72, borderRadius: 10 }} />
+                  <Image source={{ uri: photo.uri }} style={{ width: 72, height: 72, borderRadius: 10 }} />
                 ) : (
                   <View style={{ width: 72, height: 72, borderRadius: 10, backgroundColor: C.surface2, alignItems: 'center', justifyContent: 'center' }}>
                     {photo.uploading ? <Text style={{ fontSize: 12 }}>Uploading...</Text> : <Text style={{ fontSize: 12, color: C.red }}>Error</Text>}
@@ -173,10 +190,10 @@ export default function DonorCreateListingScreen() {
         {/* Basics */}
         <View style={{ marginHorizontal: 16, marginBottom: 12, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, borderRadius: 16, padding: 14 }}>
           <Text style={{ fontSize: 10, fontWeight: '700', color: C.textMid, marginBottom: 12, textTransform: 'uppercase' }}>BASICS</Text>
-          <Input label="Title" value={form.title} onChange={set('title')} placeholder="e.g. Fresh dal bhat for 4" required />
+          <Input label="Title" value={form.title} onChangeText={set('title')} placeholder="e.g. Fresh dal bhat for 4" required />
           <TextArea label="Description" value={form.description} onChange={set('description')} placeholder="Describe the food…" rows={2} />
-          <Input label="Quantity" value={form.quantity} onChange={set('quantity')} placeholder="e.g. Serves 4 · 2 kg" required />
-          <Input label="Pickup Instructions" value={form.pickup_instructions} onChange={set('pickup_instructions')} placeholder="e.g. Call before coming" />
+          <Input label="Quantity" value={form.quantity} onChangeText={set('quantity')} placeholder="e.g. Serves 4 · 2 kg" required />
+          <Input label="Pickup Instructions" value={form.pickup_instructions} onChangeText={set('pickup_instructions')} placeholder="e.g. Call before coming" />
 
           {/* Address / Location picker */}
           <View style={{ marginBottom: 16 }}>
@@ -215,58 +232,28 @@ export default function DonorCreateListingScreen() {
         {/* Timing */}
         <View style={{ marginHorizontal: 16, marginBottom: 12, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, borderRadius: 16, padding: 14 }}>
           <Text style={{ fontSize: 10, fontWeight: '700', color: C.textMid, marginBottom: 12, textTransform: 'uppercase' }}>TIMING</Text>
-          <View style={{ marginBottom: 14 }}>
-            <Text style={{ fontSize: 13, fontWeight: '700', color: C.textDark, marginBottom: 6 }}>
-              Expires at <Text style={{ color: C.red }}>*</Text>
-            </Text>
-            <TouchableOpacity
-              onPress={() => setShowExpiryPicker(true)}
-              activeOpacity={0.85}
-              style={{ width: '100%', height: 44, borderRadius: 10, borderWidth: 1, borderColor: C.border, paddingHorizontal: 12, backgroundColor: C.surface, justifyContent: 'center' }}
-            >
-              <Text style={{ fontSize: 13, color: form.expires_at ? C.textDark : C.textLight }}>
-                {form.expires_at ? new Date(form.expires_at).toLocaleString() : 'Select expiry date & time'}
+
+          {[
+            { label: 'Expires at', key: 'expires_at', show: showExpiryPicker, open: () => { setTempDate(form.expires_at ? new Date(form.expires_at) : new Date()); setShowExpiryPicker(true); }, close: () => setShowExpiryPicker(false), confirm: () => { setForm(p => ({ ...p, expires_at: tempDate.toISOString().slice(0, 16) })); setShowExpiryPicker(false); } },
+            { label: 'Pickup before', key: 'pickup_before', show: showPickupPicker, open: () => { setTempDate(form.pickup_before ? new Date(form.pickup_before) : new Date()); setShowPickupPicker(true); }, close: () => setShowPickupPicker(false), confirm: () => { setForm(p => ({ ...p, pickup_before: tempDate.toISOString().slice(0, 16) })); setShowPickupPicker(false); } },
+          ].map(({ label, key, show, open, close, confirm }, i) => (
+            <View key={key} style={{ marginBottom: i === 0 ? 14 : 0 }}>
+              <Text style={{ fontSize: 12, fontWeight: '700', color: C.textMid, marginBottom: 6, textTransform: 'uppercase' }}>
+                {label} <Text style={{ color: C.red }}>*</Text>
               </Text>
-            </TouchableOpacity>
-            {showExpiryPicker && (
-              <DateTimePicker
-                value={form.expires_at ? new Date(form.expires_at) : new Date()}
-                mode="datetime"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                minimumDate={new Date()}
-                onChange={(event, date) => {
-                  setShowExpiryPicker(false);
-                  if (date) setForm(p => ({ ...p, expires_at: date.toISOString().slice(0, 16) }));
-                }}
-              />
-            )}
-          </View>
-          <View>
-            <Text style={{ fontSize: 13, fontWeight: '700', color: C.textDark, marginBottom: 6 }}>
-              Pickup before <Text style={{ color: C.red }}>*</Text>
-            </Text>
-            <TouchableOpacity
-              onPress={() => setShowPickupPicker(true)}
-              activeOpacity={0.85}
-              style={{ width: '100%', height: 44, borderRadius: 10, borderWidth: 1, borderColor: C.border, paddingHorizontal: 12, backgroundColor: C.surface, justifyContent: 'center' }}
-            >
-              <Text style={{ fontSize: 13, color: form.pickup_before ? C.textDark : C.textLight }}>
-                {form.pickup_before ? new Date(form.pickup_before).toLocaleString() : 'Select pickup deadline'}
-              </Text>
-            </TouchableOpacity>
-            {showPickupPicker && (
-              <DateTimePicker
-                value={form.pickup_before ? new Date(form.pickup_before) : new Date()}
-                mode="datetime"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                minimumDate={new Date()}
-                onChange={(event, date) => {
-                  setShowPickupPicker(false);
-                  if (date) setForm(p => ({ ...p, pickup_before: date.toISOString().slice(0, 16) }));
-                }}
-              />
-            )}
-          </View>
+              <TouchableOpacity onPress={open} activeOpacity={0.8} style={{
+                height: 48, borderRadius: 12, borderWidth: 1.5,
+                borderColor: show ? C.green : C.border,
+                paddingHorizontal: 14, backgroundColor: C.surface2,
+                flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+              }}>
+                <Text style={{ fontSize: 14, color: (form as any)[key] ? C.textDark : C.textLight, fontWeight: (form as any)[key] ? '500' : '400' }}>
+                  {(form as any)[key] ? formatDate((form as any)[key]) : `Select ${label.toLowerCase()}`}
+                </Text>
+                <Text style={{ fontSize: 16, color: C.textLight }}>🕐</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
         </View>
       </ScrollView>
 
@@ -285,6 +272,41 @@ export default function DonorCreateListingScreen() {
           {loading ? 'Posting…' : photosPreviews.some(p => p.uploading) ? 'Uploading photos…' : 'Post listing'}
         </Btn>
       </View>
+
+      {/* Date picker modal */}
+      {(showExpiryPicker || showPickupPicker) && (
+        <Modal transparent animationType="slide" visible onRequestClose={() => { setShowExpiryPicker(false); setShowPickupPicker(false); }}>
+          <TouchableOpacity style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' }} activeOpacity={1} onPress={() => { setShowExpiryPicker(false); setShowPickupPicker(false); }} />
+          <View style={{ backgroundColor: C.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: insets.bottom + 8 }}>
+            {/* Header */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: C.border }}>
+              <TouchableOpacity onPress={() => { setShowExpiryPicker(false); setShowPickupPicker(false); }}>
+                <Text style={{ fontSize: 15, color: C.textMid }}>Cancel</Text>
+              </TouchableOpacity>
+              <Text style={{ fontSize: 15, fontWeight: '700', color: C.textDark }}>
+                {showExpiryPicker ? 'Expires at' : 'Pickup before'}
+              </Text>
+              <TouchableOpacity onPress={() => {
+                const key = showExpiryPicker ? 'expires_at' : 'pickup_before';
+                setForm(p => ({ ...p, [key]: toLocalSlice(tempDate) }));
+                setShowExpiryPicker(false); setShowPickupPicker(false);
+              }}>
+                <Text style={{ fontSize: 15, color: C.green, fontWeight: '700' }}>Done</Text>
+              </TouchableOpacity>
+            </View>
+
+            <DateTimePicker
+              value={tempDate}
+              mode="datetime"
+              display="spinner"
+              minimumDate={new Date()}
+              onChange={(_, date) => { if (date) setTempDate(date); }}
+              textColor={C.textDark}
+              style={{ height: 216 }}
+            />
+          </View>
+        </Modal>
+      )}
 
       {showLocationPicker && (
         <LocationPickerModal

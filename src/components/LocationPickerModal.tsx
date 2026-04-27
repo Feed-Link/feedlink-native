@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C } from '../theme';
 import * as Location from 'expo-location';
-import MapView, { Marker } from 'react-native-maps';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface LocationPickerModalProps {
   lat: number;
@@ -21,21 +21,19 @@ export default function LocationPickerModal({ lat, lng, address, onConfirm, onCl
   const [pin, setPin] = React.useState({ lat, lng });
   const [pinAddress, setPinAddress] = React.useState(address);
   const [geocoding, setGeocoding] = React.useState(false);
-  const mapRef = React.useRef<any>(null);
-
-  const formatNominatim = (addr: any) => {
-    const local = addr.neighbourhood || addr.suburb || addr.city_district || addr.quarter || addr.village;
-    const city = addr.city || addr.town || addr.county || addr.state_district;
-    return [local, city].filter(Boolean).join(', ');
-  };
 
   const reverseGeocode = async (rlat: number, rlng: number) => {
     setGeocoding(true);
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${rlat}&lon=${rlng}&format=json&accept-language=en`);
+      const res = await fetch(`https://photon.komoot.io/reverse?lon=${rlng}&lat=${rlat}&limit=1`);
       const data = await res.json();
-      const formatted = formatNominatim(data.address || {}) || `${rlat.toFixed(4)}, ${rlng.toFixed(4)}`;
-      setPinAddress(formatted);
+      const p = data?.features?.[0]?.properties;
+      if (p) {
+        const parts = [p.name, p.city || p.county].filter(Boolean);
+        setPinAddress(parts.join(', ') || `${rlat.toFixed(4)}, ${rlng.toFixed(4)}`);
+      } else {
+        setPinAddress(`${rlat.toFixed(4)}, ${rlng.toFixed(4)}`);
+      }
     } catch {
       setPinAddress(`${rlat.toFixed(4)}, ${rlng.toFixed(4)}`);
     } finally {
@@ -43,19 +41,36 @@ export default function LocationPickerModal({ lat, lng, address, onConfirm, onCl
     }
   };
 
-  const handleSearch = async (q: string) => {
+  const searchTimer = React.useRef<any>(null);
+
+  const handleSearch = (q: string) => {
     setSearch(q);
     if (!q.trim()) { setResults([]); return; }
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => doSearch(q), 600);
+  };
+
+  const doSearch = async (q: string) => {
     setSearching(true);
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&addressdetails=1&limit=6&countrycodes=np&accept-language=en`);
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5&lang=en&bbox=80.058,26.347,88.201,29.305`;
+      const res = await fetch(url);
       const data = await res.json();
-      setResults(data.map((r: any) => ({
-        display: formatNominatim(r.address) || r.display_name.split(',').slice(0, 2).join(',').trim(),
-        lat: parseFloat(r.lat),
-        lng: parseFloat(r.lon),
-      })));
-    } catch { } finally { setSearching(false); }
+      const features = data?.features || [];
+      setResults(features.map((f: any) => {
+        const p = f.properties;
+        const parts = [p.name, p.city || p.county, p.country].filter(Boolean);
+        return {
+          display: parts.join(', '),
+          lat: f.geometry.coordinates[1],
+          lng: f.geometry.coordinates[0],
+        };
+      }));
+    } catch {
+      setResults([]);
+    } finally {
+      setSearching(false);
+    }
   };
 
   const moveTo = (nlat: number, nlng: number, addr: string) => {
@@ -63,7 +78,7 @@ export default function LocationPickerModal({ lat, lng, address, onConfirm, onCl
     setPinAddress(addr);
     setResults([]);
     setSearch('');
-    mapRef.current?.animateToRegion({ latitude: nlat, longitude: nlng, latitudeDelta: 0.01, longitudeDelta: 0.01 });
+    reverseGeocode(nlat, nlng);
   };
 
   const useMyLocation = async () => {
@@ -91,62 +106,82 @@ export default function LocationPickerModal({ lat, lng, address, onConfirm, onCl
           </TouchableOpacity>
         </View>
 
-        {/* Search */}
-        <View style={styles.searchContainer}>
-          <Text style={styles.searchIcon}>🔍</Text>
-          <TextInput
-            value={search}
-            onChangeText={handleSearch}
-            placeholder="Search: Pepsicola, Thamel, Baneshwor…"
-            placeholderTextColor={C.textLight}
-            style={styles.searchInput}
-          />
-          {searching && <ActivityIndicator size="small" color={C.textMid} style={{ marginRight: 8 }} />}
-        </View>
-
-        {/* Search results */}
-        {results.length > 0 && (
-          <View style={styles.resultsContainer}>
-            <FlatList
-              data={results}
-              keyExtractor={(_, i) => String(i)}
-              renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => moveTo(item.lat, item.lng, item.display)} style={styles.resultItem}>
-                  <Text style={{ fontSize: 12, marginRight: 8 }}>📍</Text>
-                  <Text style={styles.resultText}>{item.display}</Text>
-                </TouchableOpacity>
-              )}
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+          {/* Search */}
+          <View style={styles.searchContainer}>
+            <MaterialCommunityIcons name="magnify" size={18} color={C.textMid} style={{ marginRight: 8 }} />
+            <TextInput
+              value={search}
+              onChangeText={handleSearch}
+              placeholder="Search location..."
+              placeholderTextColor={C.textLight}
+              style={styles.searchInput}
             />
+            {searching && (
+              <View style={{ position: 'absolute', right: 28, top: 0, bottom: 0, justifyContent: 'center' }}>
+                <ActivityIndicator size="small" color={C.textMid} />
+              </View>
+            )}
           </View>
-        )}
 
-        {/* Map */}
-        <View style={{ flex: 1, minHeight: 280 }}>
-          <MapView
-            ref={mapRef}
-            style={{ flex: 1 }}
-            initialRegion={{ latitude: pin.lat, longitude: pin.lng, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
-            onPress={e => {
-              const { latitude, longitude } = e.nativeEvent.coordinate;
-              moveTo(latitude, longitude, '');
-              reverseGeocode(latitude, longitude);
-            }}
-          >
-            <Marker coordinate={{ latitude: pin.lat, longitude: pin.lng }} draggable
-              onDragEnd={e => {
-                const { latitude, longitude } = e.nativeEvent.coordinate;
-                moveTo(latitude, longitude, '');
-                reverseGeocode(latitude, longitude);
-              }}
-            />
-          </MapView>
-        </View>
+          {/* Search results list */}
+          {results.length > 0 ? (
+            <View style={{
+              marginHorizontal: 16, marginBottom: 12,
+              backgroundColor: C.surface,
+              borderRadius: 14,
+              borderWidth: 1, borderColor: C.border,
+              overflow: 'hidden',
+              shadowColor: '#000', shadowOpacity: 0.08,
+              shadowRadius: 12, shadowOffset: { width: 0, height: 4 },
+              elevation: 4,
+            }}>
+              {results.map((item, i) => (
+                <TouchableOpacity
+                  key={i}
+                  onPress={() => moveTo(item.lat, item.lng, item.display)}
+                  activeOpacity={0.6}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingVertical: 11,
+                    paddingHorizontal: 14,
+                    borderBottomWidth: i < results.length - 1 ? 1 : 0,
+                    borderBottomColor: C.border,
+                    gap: 10,
+                  }}
+                >
+                  <MaterialCommunityIcons name="map-marker-outline" size={18} color={C.green} style={{ flexShrink: 0 }} />
+                  <Text style={{ fontSize: 13, color: C.textDark, flex: 1, opacity: 0.85 }} numberOfLines={2}>{item.display}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : search && !searching ? (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 }}>
+              <MaterialCommunityIcons name="magnify-close" size={40} color={C.textLight} />
+              <Text style={{ fontSize: 14, color: C.textMid, marginTop: 8 }}>No places found</Text>
+            </View>
+          ) : null}
+
+          {/* Map placeholder */}
+          {results.length === 0 && (
+            <View style={{ flex: 1, backgroundColor: C.surface2, alignItems: 'center', justifyContent: 'center', gap: 12, marginHorizontal: 16, marginVertical: 12, borderRadius: 12 }}>
+              <MaterialCommunityIcons name="map-marker-radius" size={48} color={C.green} />
+              <Text style={{ fontSize: 14, color: C.textMid, fontWeight: '600' }}>Tap "My location" or search</Text>
+              <View style={{ backgroundColor: C.tagGreen, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 }}>
+                <Text style={{ fontSize: 12, color: C.green, fontWeight: '700' }}>
+                  {pin.lat.toFixed(5)}, {pin.lng.toFixed(5)}
+                </Text>
+              </View>
+            </View>
+          )}
+        </ScrollView>
 
         {/* Footer */}
         <View style={styles.footer}>
           <View style={styles.addressRow}>
             <Text style={{ fontSize: 12, marginRight: 8 }}>📍</Text>
-            <Text style={styles.addressText}>{geocoding ? 'Finding address…' : (pinAddress || 'Tap map to set location')}</Text>
+            <Text style={styles.addressText} numberOfLines={2}>{geocoding ? 'Finding address…' : (pinAddress || 'Use search or "My location"')}</Text>
           </View>
           <TouchableOpacity
             onPress={() => onConfirm(pin.lat, pin.lng, pinAddress)}
@@ -211,57 +246,22 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   searchContainer: {
-    padding: 10,
-    paddingHorizontal: 16,
-    position: 'relative',
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  searchIcon: {
-    position: 'absolute',
-    left: 28,
-    fontSize: 15,
-    zIndex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   searchInput: {
     flex: 1,
     paddingVertical: 10,
-    paddingHorizontal: 36,
+    paddingHorizontal: 12,
+    paddingRight: 36,
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: C.border,
     fontSize: 14,
     color: C.textDark,
     backgroundColor: C.surface,
-  },
-  resultsContainer: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    top: 60,
-    backgroundColor: C.surface,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.13,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 10,
-    zIndex: 10,
-    maxHeight: 200,
-  },
-  resultItem: {
-    padding: 11,
-    paddingHorizontal: 14,
-    fontSize: 13,
-    color: C.textDark,
-    borderBottomWidth: 1,
-    borderBottomColor: C.border,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  resultText: {
-    fontSize: 13,
-    color: C.textDark,
   },
   footer: {
     padding: 12,
@@ -280,6 +280,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: C.textDark,
     fontWeight: '600',
+    flex: 1,
   },
   confirmBtn: {
     backgroundColor: C.green,
