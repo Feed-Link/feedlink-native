@@ -117,8 +117,8 @@ export default function DonorListingsScreen() {
         activeOpacity={0.7}
         style={{
           position: 'absolute',
-          bottom: 100 + insets.bottom,
-          right: 16,
+          bottom: 85 + insets.bottom,
+          right: 20,
           width: 56,
           height: 56,
           borderRadius: 28,
