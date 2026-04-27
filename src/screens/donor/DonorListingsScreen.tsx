@@ -94,7 +94,11 @@ export default function DonorListingsScreen() {
         {loading ? (
           <Spinner />
         ) : listings.length === 0 ? (
-          <EmptyState icon="📋" title="No listings" subtitle={tab ? `No ${tab} listings` : 'No listings yet'} />
+          <EmptyState
+            icon={<MaterialCommunityIcons name="clipboard-list-outline" size={40} color={C.textLight} />}
+            title="No listings"
+            subtitle={tab ? `No ${tab} listings` : 'No listings yet'}
+          />
         ) : (
           listings.map((l: any) => (
             <ListingCard
