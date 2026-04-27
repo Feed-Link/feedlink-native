@@ -20,7 +20,7 @@ export default function ForgotPasswordScreen() {
     try {
       await authApi.auth.forgotPassword({ email });
       showToast('Reset code sent!', 'success');
-      router.push(`/auth/reset-password?email=${encodeURIComponent(email)}` as any);
+      router.push(`/reset-password?email=${encodeURIComponent(email)}` as any);
     } catch (e: any) {
       showToast(e.message || 'Failed to send reset code', 'error');
     } finally { setLoading(false); }
@@ -28,7 +28,7 @@ export default function ForgotPasswordScreen() {
 
   return (
     <View style={styles.container}>
-      <ScreenHeader title="Reset Password" onBack={() => router.push('/auth/login' as any)} />
+      <ScreenHeader title="Reset Password" onBack={() => router.push('/login' as any)} />
       <View style={styles.body}>
         <Text style={styles.heading}>Reset Password</Text>
         <Text style={styles.subheading}>Enter your email and we'll send you a reset code.</Text>

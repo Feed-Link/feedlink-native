@@ -33,7 +33,7 @@ export default function RegisterScreen() {
       });
       showToast('Registered! Check your email for OTP.', 'success');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-      router.push(`/auth/verify-otp?email=${encodeURIComponent(form.email)}&context=register&role=${role}` as any);
+      router.push(`/verify-otp?email=${encodeURIComponent(form.email)}&context=register&role=${role}` as any);
     } catch (e: any) {
       showToast(e.message || 'Registration failed', 'error');
     } finally { setLoading(false); }
@@ -63,7 +63,7 @@ export default function RegisterScreen() {
         </Btn>
         <Text style={styles.loginText}>
           Already have an account?{' '}
-          <Text style={styles.loginLink} onPress={() => router.push('/auth/login' as any)}>Log in</Text>
+          <Text style={styles.loginLink} onPress={() => router.push('/login' as any)}>Log in</Text>
         </Text>
       </ScrollView>
     </View>

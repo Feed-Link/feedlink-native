@@ -46,7 +46,7 @@ export default function ResetPasswordScreen() {
 
   return (
     <View style={styles.container}>
-      <ScreenHeader title="Create New Password" onBack={() => router.push('/auth/forgot-password' as any)} />
+      <ScreenHeader title="Create New Password" onBack={() => router.push('/forgot-password' as any)} />
       <View style={styles.body}>
         <Text style={styles.heading}>Create New Password</Text>
         <Text style={styles.subheading}>Enter the 6-digit code from your email.</Text>

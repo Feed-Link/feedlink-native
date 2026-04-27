@@ -15,7 +15,7 @@ export default function SplashScreen() {
       if (role) {
         router.replace(`/${role}/home` as any);
       } else {
-        router.replace('/auth/onboarding' as any);
+        router.replace('/onboarding' as any);
       }
     }, 2000);
     return () => clearTimeout(t);

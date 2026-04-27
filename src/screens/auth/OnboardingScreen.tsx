@@ -61,12 +61,12 @@ export default function OnboardingScreen() {
       </View>
 
       <View style={styles.footer}>
-        <Btn fullWidth size="lg" variant="amber" onPress={() => router.push(`/auth/register?role=${role}` as any)}>
+        <Btn fullWidth size="lg" variant="amber" onPress={() => router.push(`/register?role=${role}` as any)}>
           Continue →
         </Btn>
         <Text style={styles.loginText}>
           Already have an account?{' '}
-          <Text style={styles.loginLink} onPress={() => router.push('/auth/login' as any)}>Log in</Text>
+          <Text style={styles.loginLink} onPress={() => router.push('/login' as any)}>Log in</Text>
         </Text>
       </View>
     </View>

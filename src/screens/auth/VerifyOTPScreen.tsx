@@ -67,7 +67,7 @@ export default function VerifyOTPScreen() {
         router.replace(`/${userRole}/home` as any);
       } else {
         showToast('Verified!', 'success');
-        router.push('/auth/login' as any);
+        router.push('/login' as any);
       }
     } catch (e: any) {
       showToast(e.message || 'Verification failed', 'error');
@@ -82,7 +82,7 @@ export default function VerifyOTPScreen() {
     } catch (e: any) { showToast(e.message, 'error'); }
   };
 
-  const backTarget = context === 'reset' ? '/auth/forgot-password' : context === 'login' ? '/auth/login' : '/auth/register';
+  const backTarget = context === 'reset' ? '/forgot-password' : context === 'login' ? '/login' : '/register';
 
   return (
     <View style={styles.container}>

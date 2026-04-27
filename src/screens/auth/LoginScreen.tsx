@@ -38,7 +38,7 @@ export default function LoginScreen() {
       if (isUnverified && form.email) {
         try { await authApi.auth.resendOtp({ email: form.email }); } catch (_) {}
         showToast('Please verify your email first. A code has been sent.', 'error');
-        router.push(`/auth/verify-otp?email=${encodeURIComponent(form.email)}&context=login` as any);
+        router.push(`/verify-otp?email=${encodeURIComponent(form.email)}&context=login` as any);
       } else {
         showToast(e.message || 'Login failed', 'error');
       }
@@ -57,7 +57,7 @@ export default function LoginScreen() {
         <View style={styles.form}>
           <Input label="Email" value={form.email} onChangeText={update('email')} placeholder="hello@example.com" keyboardType="email-address" />
           <Input label="Password" value={form.password} onChangeText={update('password')} placeholder="••••••••••" secureTextEntry />
-          <TouchableOpacity style={styles.forgotRow} onPress={() => router.push('/auth/forgot-password' as any)}>
+          <TouchableOpacity style={styles.forgotRow} onPress={() => router.push('/forgot-password' as any)}>
             <Text style={styles.forgotLink}>Forgot password?</Text>
           </TouchableOpacity>
           <Btn fullWidth size="lg" variant="amber" onPress={submit} disabled={loading}>
@@ -65,7 +65,7 @@ export default function LoginScreen() {
           </Btn>
           <Text style={styles.signupText}>
             Don't have an account?{' '}
-            <Text style={styles.signupLink} onPress={() => router.push('/auth/onboarding' as any)}>Sign up</Text>
+            <Text style={styles.signupLink} onPress={() => router.push('/onboarding' as any)}>Sign up</Text>
           </Text>
         </View>
       </View>

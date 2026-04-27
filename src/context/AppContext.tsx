@@ -45,7 +45,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await AsyncStorage.removeItem('fl_user');
     setUser(null);
     setRole(null);
-    router.replace('/auth/onboarding' as any);
+    router.replace('/onboarding' as any);
   }, []);
 
   // Auto-check auth on mount
