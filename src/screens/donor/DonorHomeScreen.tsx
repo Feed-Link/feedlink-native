@@ -81,16 +81,16 @@ export default function DonorHomeScreen() {
           </View>
 
           {/* Stats cards */}
-          <View style={{ flexDirection: 'row', gap: 8, marginTop: 16 }}>
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 18 }}>
             {[
-              { label: 'Active', val: stats?.listings_active ?? '–', icon: 'package-variant-outline' },
-              { label: 'Claimed', val: stats?.listings_completed ? stats.listings_active + 1 : '–', icon: 'hand-extended-outline' },
-              { label: 'Done', val: stats?.listings_completed ?? '–', icon: 'check-circle-outline' },
+              { label: 'Active', val: stats?.listings_active ?? '–', icon: 'fire' },
+              { label: 'Claimed', val: stats?.listings_completed ? stats.listings_active + 1 : '–', icon: 'hands-together' },
+              { label: 'Done', val: stats?.listings_completed ?? '–', icon: 'check-decagram' },
             ].map(s => (
-              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 8, alignItems: 'center' }}>
-                <MaterialCommunityIcons name={s.icon as any} size={24} color="#fff" style={{ marginBottom: 6 }} />
-                <Text style={{ fontWeight: '700', fontSize: 20, color: '#fff' }}>{s.val}</Text>
-                <Text style={{ fontSize: 11, color: 'rgba(255,255,255,0.8)', fontWeight: '500', marginTop: 2 }}>{s.label}</Text>
+              <View key={s.label} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 14, paddingVertical: 14, paddingHorizontal: 10, alignItems: 'center', justifyContent: 'center' }}>
+                <MaterialCommunityIcons name={s.icon as any} size={26} color="#fff" style={{ marginBottom: 8 }} />
+                <Text style={{ fontWeight: '800', fontSize: 22, color: '#fff', lineHeight: 24 }}>{s.val}</Text>
+                <Text style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)', fontWeight: '600', marginTop: 4 }}>{s.label}</Text>
               </View>
             ))}
           </View>
