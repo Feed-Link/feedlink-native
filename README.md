@@ -4,6 +4,14 @@ A food-sharing mobile app connecting donors with surplus food to recipients in n
 
 ---
 
+## Try the App
+
+**Preview:** https://expo.io/@samhubby/feedlink-app
+
+Open this link in the **Expo Go** app on any device (iOS/Android). Updates deploy automatically on every push to `main`.
+
+---
+
 ## Setup
 
 ```bash
@@ -44,3 +52,23 @@ src/
 - **Roles:** `donor` | `recipient`
 
 See `docs/CLAUDE.md` for full API reference, screen inventory, and UX decisions.
+
+## CI/CD
+
+Every push to `main` automatically triggers:
+- **GitHub Actions CI** — TypeScript type check
+- **EAS Update** — New preview link published to Expo
+
+To manually publish an update:
+
+```bash
+npm install -g eas-cli
+eas update --branch preview
+```
+
+## Branches
+
+| Branch | Purpose |
+|--------|---------|
+| `main` | Auto-deploys preview via EAS Update |
+| `preview` | Stable preview build |

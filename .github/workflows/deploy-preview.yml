@@ -20,4 +20,4 @@ jobs:
       - name: Run EAS Update
         env:
           EAS_SECRET_TOKEN: ${{ secrets.EAS_SECRET_TOKEN }}
-        run: npx eas update --branch preview --non-interactive
+        run: CI=1 npx eas update --branch preview --non-interactive
