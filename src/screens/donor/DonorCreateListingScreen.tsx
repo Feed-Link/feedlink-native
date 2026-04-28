@@ -1,19 +1,19 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image, Modal, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback, ScrollView } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import React from 'react';
+import { Image, Keyboard, KeyboardAvoidingView, Modal, Platform, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { shared } from '../../api/client';
+import { donor } from '../../api/donor';
+import Btn from '../../components/Btn';
+import Input from '../../components/Input';
+import LocationPickerModal from '../../components/LocationPickerModal';
+import TagChip from '../../components/TagChip';
+import TextArea from '../../components/TextArea';
 import { useApp } from '../../context/AppContext';
 import { C } from '../../theme';
-import { donor } from '../../api/donor';
-import { shared } from '../../api/client';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as ImagePicker from 'expo-image-picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Input from '../../components/Input';
-import TextArea from '../../components/TextArea';
-import TagChip from '../../components/TagChip';
-import Btn from '../../components/Btn';
-import LocationPickerModal from '../../components/LocationPickerModal';
 
 const ALL_TAGS = ['cooked', 'raw_ingredients', 'packaged', 'for_humans', 'for_animals', 'for_both'];
 const MAX_PHOTOS = 4;
@@ -122,14 +122,14 @@ export default function DonorCreateListingScreen() {
 
   const submit = async () => {
     if (!form.expires_at) return showToast('Set expiry time', 'error');
-    if (!form.pickup_before) return showToast('Set pickup deadline', 'error');
     setLoading(true);
     try {
-      await donor.createListing({
+      const payload: any = {
         ...form,
         expires_at: toLocalISO(form.expires_at),
-        pickup_before: toLocalISO(form.pickup_before),
-      });
+      };
+      if (form.pickup_before) payload.pickup_before = toLocalISO(form.pickup_before);
+      await donor.createListing(payload);
       showToast('Listing posted!', 'success');
       router.push('/donor/listings' as any);
     } catch (e: any) {
@@ -264,7 +264,7 @@ export default function DonorCreateListingScreen() {
 
             {/* Schedule card */}
             <View style={{ backgroundColor: C.surface, borderRadius: 16, borderWidth: 1, borderColor: C.border, padding: 12 }}>
-              <Text style={{ fontSize: 12, fontWeight: '700', color: C.textMid, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.4 }}>Schedule <Text style={{ color: C.red }}>*</Text></Text>
+              <Text style={{ fontSize: 10, fontWeight: '700', color: C.textMid, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.4 }}>Schedule <Text style={{ color: C.textMid, fontSize: 10 }}>(pickup deadline optional, defaults to +2h)</Text></Text>
               {[
                 { label: 'Expires at', key: 'expires_at', icon: 'clock-alert-outline' as const, open: () => { setTempDate(form.expires_at ? new Date(form.expires_at) : new Date()); setShowExpiryPicker(true); } },
                 { label: 'Pickup before', key: 'pickup_before', icon: 'run-fast' as const, open: () => { setTempDate(form.pickup_before ? new Date(form.pickup_before) : new Date()); setShowPickupPicker(true); } },
