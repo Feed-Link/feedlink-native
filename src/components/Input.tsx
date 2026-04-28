@@ -7,8 +7,11 @@ interface InputProps extends TextInputProps {
   required?: boolean;
 }
 
-export default function Input({ label, value, onChangeText, placeholder, required, secureTextEntry, keyboardType, style, ...rest }: InputProps) {
+export default React.memo(function Input({ label, value, onChangeText, placeholder, required, secureTextEntry, keyboardType, style, ...rest }: InputProps) {
   const [focused, setFocused] = React.useState(false);
+
+  const borderColor = focused ? C.green : 'transparent';
+  const bgColor = focused ? C.surface : C.surface2;
 
   return (
     <View style={{ marginBottom: 16 }}>
@@ -26,22 +29,22 @@ export default function Input({ label, value, onChangeText, placeholder, require
         keyboardType={keyboardType}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        style={{
-          width: '100%',
-          height: 48,
-          borderRadius: 14,
-          borderWidth: 2,
-          borderColor: focused ? C.green : 'transparent',
-          backgroundColor: C.surface2,
-          paddingHorizontal: 14,
-          fontSize: 14,
-          color: C.textDark,
-          outline: 'none',
-          ...(focused ? { boxShadow: '0 0 0 4px rgba(22,163,74,0.1)' } : {}),
-          ...(style as object || {}),
-        }}
+        style={[
+          {
+            width: '100%',
+            height: 48,
+            borderRadius: 14,
+            borderWidth: 2,
+            borderColor,
+            backgroundColor: bgColor,
+            paddingHorizontal: 14,
+            fontSize: 14,
+            color: C.textDark,
+          },
+          style,
+        ]}
         {...rest}
       />
     </View>
   );
-}
+});

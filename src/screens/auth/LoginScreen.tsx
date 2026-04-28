@@ -17,7 +17,8 @@ export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const update = (k: string) => (v: string) => setForm(p => ({ ...p, [k]: v }));
+  const setEmail = React.useCallback((v: string) => setForm(p => ({ ...p, email: v })), []);
+  const setPassword = React.useCallback((v: string) => setForm(p => ({ ...p, password: v })), []);
 
   const submit = async () => {
     if (!form.email || !form.password) { showToast('Please fill all fields', 'error'); return; }
@@ -62,12 +63,12 @@ export default function LoginScreen() {
 
         {/* Form card overlapping header */}
         <View style={{ marginHorizontal: 20, marginTop: -24, backgroundColor: C.surface, borderRadius: 24, padding: 24, borderWidth: 1, borderColor: C.border, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 16, elevation: 4 }}>
-          <Input label="Email" value={form.email} onChangeText={update('email')} placeholder="hello@example.com" keyboardType="email-address" />
-          <Input label="Password" value={form.password} onChangeText={update('password')} placeholder="••••••••••" secureTextEntry />
+          <Input label="Email" value={form.email} onChangeText={setEmail} placeholder="hello@example.com" keyboardType="email-address" />
+          <Input label="Password" value={form.password} onChangeText={setPassword} placeholder="••••••••••" secureTextEntry />
           <TouchableOpacity onPress={() => router.push('/forgot-password' as any)} style={{ alignItems: 'flex-end', marginTop: -8, marginBottom: 24 }}>
             <Text style={{ fontSize: 13, fontWeight: '700', color: C.amber }}>Forgot password?</Text>
           </TouchableOpacity>
-          <Btn fullWidth size="lg" variant="amber" onPress={submit} disabled={loading} loading={loading}>
+          <Btn fullWidth size="lg" onPress={submit} disabled={loading} loading={loading}>
             {loading ? 'Logging in…' : 'Log In'}
           </Btn>
         </View>

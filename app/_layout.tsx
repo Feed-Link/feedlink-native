@@ -4,6 +4,18 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { AppProvider } from '@/src/context/AppContext';
 import { StatusBar } from 'expo-status-bar';
+import * as Updates from 'expo-updates';
+
+async function checkForUpdates() {
+  try {
+    const update = await Updates.checkForUpdateAsync();
+    if (update.isAvailable) {
+      await Updates.fetchUpdateAsync();
+    }
+  } catch (e) {
+    // Silent fail — don't block the app
+  }
+}
 
 export default function RootLayout() {
   const [fontsLoaded, error] = useFonts({
@@ -15,6 +27,10 @@ export default function RootLayout() {
       SplashScreen.hideAsync().catch(() => {});
     }
   }, [fontsLoaded, error]);
+
+  useEffect(() => {
+    checkForUpdates();
+  }, []);
 
   if (!fontsLoaded && !error) return null;
 

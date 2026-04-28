@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useApp } from '../../context/AppContext';
 import { C } from '../../theme';
 import { notifications } from '../../api/client';
@@ -33,6 +34,7 @@ const timeAgo = (iso: string) => {
 
 export default function DonorNotificationsScreen() {
   const { showToast, setUnreadCount } = useApp();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
 
   const [items, setItems] = React.useState<any[]>([]);
@@ -92,6 +94,28 @@ export default function DonorNotificationsScreen() {
     } catch (_) {}
   };
 
+  const getNavTarget = (n: any): string | null => {
+    let data = n.data;
+    if (typeof data === 'string') { try { data = JSON.parse(data); } catch { data = {}; } }
+    if (!data || typeof data !== 'object') data = {};
+
+    const listingId = data.listing_id || data.listingId || n.listing_id || n.listingId;
+    const requestId = data.request_id || data.requestId || n.request_id || n.requestId;
+
+    // Handle actual notification types from the API
+    const listingTypes = ['claim_received', 'claim_confirmed', 'claim_rejected',
+      'pickup_completed', 'listing_expired', 'listing_expired_uncollected',
+      'listing_cancelled', 'listing_reopened'];
+
+    if (listingTypes.includes(n.type) && listingId) {
+      return `/donor/listing-detail?id=${listingId}`;
+    }
+    if (n.type === 'request_accepted' && requestId) {
+      return `/recipient/request-detail?id=${requestId}`;
+    }
+    return null;
+  };;
+
   React.useEffect(() => { setUnreadCount(0); loadFirst(); }, []);
 
   return (
@@ -139,10 +163,19 @@ export default function DonorNotificationsScreen() {
               {items.map((n: any) => {
                 const iconDef = ICONS[n.type] || { icon: 'bell-outline', color: C.textMid, bgColor: C.surface2 };
                 const isUnread = !n.read_at;
+
                 return (
                   <TouchableOpacity
                     key={n.id}
-                    onPress={() => { if (isUnread) markRead(n.id); }}
+                    onPress={() => {
+                      if (isUnread) markRead(n.id);
+                      const navTarget = getNavTarget(n);
+                      if (navTarget) {
+                        router.push(navTarget as any);
+                      } else {
+                        showToast(`Cannot open notification`, 'error');
+                      }
+                    }}
                     activeOpacity={0.7}
                     style={{
                       backgroundColor: C.surface,
