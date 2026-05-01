@@ -28,8 +28,10 @@ export default function RecipientListingDetailScreen() {
   const load = async () => {
     setLoading(true);
     try {
+      const userLat = user?.latitude || 27.7172;
+      const userLng = user?.longitude || 85.3240;
       const [lRes, cRes] = await Promise.all([
-        recipient.getNearbyListings(`?per_page=100`),
+        recipient.getNearbyListings(`?lat=${userLat}&lng=${userLng}&per_page=100`),
         recipient.getClaims(),
       ]);
       const listings = Array.isArray(lRes.data) ? lRes.data : [];

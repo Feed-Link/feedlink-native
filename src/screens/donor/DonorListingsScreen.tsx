@@ -13,9 +13,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const TABS = [
   { key: 'active', label: 'Active', icon: 'fire' },
-  { key: 'claimed', label: 'Claimed', icon: 'handshake-outline' },
+  { key: 'claimed', label: 'Claimed', icon: 'basket' },
   { key: 'expired', label: 'Expired', icon: 'clock-remove-outline' },
-  { key: '', label: 'All', icon: 'view-list-outline' },
+  { key: '', label: 'All', icon: 'list' },
 ];
 
 const SORT_OPTIONS = [
@@ -24,8 +24,8 @@ const SORT_OPTIONS = [
 ];
 
 const EMPTY_CONFIG: Record<string, { icon: string; title: string; subtitle: string }> = {
-  active:  { icon: 'fire',              title: 'No active listings',  subtitle: 'Post a listing and start sharing food today' },
-  claimed: { icon: 'handshake-outline', title: 'No claimed listings', subtitle: 'When a recipient claims your food it shows here' },
+  active:  { icon: 'fire',            title: 'No active listings',  subtitle: 'Post a listing and start sharing food today' },
+  claimed: { icon: 'basket',       title: 'No claimed listings', subtitle: 'When a recipient claims your food it shows here' },
   expired: { icon: 'clock-remove-outline', title: 'No expired listings', subtitle: 'Listings past their expiry date appear here' },
   '':      { icon: 'inbox-outline',     title: 'No listings yet',     subtitle: "You haven't posted any food listings yet" },
 };

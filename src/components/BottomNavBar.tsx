@@ -71,7 +71,7 @@ export default function BottomNavBar({ tabs, active, accentColor = C.green }: Bo
 // Donor-specific tabs
 export const DONOR_TABS: TabItem[] = [
   { key: '/donor/home', label: 'Home', iconName: 'home-outline' },
-  { key: '/donor/listings', label: 'Listings', iconName: 'grid-outline' },
+  { key: '/donor/listings', label: 'Listings', iconName: 'grid' },
   { key: '/donor/map', label: 'Map', iconName: 'map-outline' },
   { key: '/donor/notifications', label: 'Alerts', iconName: 'notifications-outline' },
   { key: '/donor/profile', label: 'Profile', iconName: 'person-outline' },
@@ -80,7 +80,7 @@ export const DONOR_TABS: TabItem[] = [
 // Recipient-specific tabs
 export const RECIPIENT_TABS: TabItem[] = [
   { key: '/recipient/home',        label: 'Home',      iconName: 'home-outline' },
-  { key: '/recipient/my-claims',     label: 'My Claims', iconName: 'handshake-outline' },
+  { key: '/recipient/my-claims',     label: 'My Claims', iconName: 'basket-outline' },
   { key: '/recipient/map',          label: 'Map',       iconName: 'map-outline' },
   { key: '/recipient/notifications', label: 'Alerts',    iconName: 'notifications-outline' },
   { key: '/recipient/profile',       label: 'Profile',   iconName: 'person-outline' },

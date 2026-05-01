@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'react-native';
 
 const MAP_TOGGLE = [
-  { key: 'list', label: 'List', icon: 'view-list' },
+  { key: 'list', label: 'List', icon: 'list' },
   { key: 'map', label: 'Map', icon: 'map' },
 ];
 
@@ -112,7 +112,7 @@ export default function RecipientHomeScreen() {
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 20 }}>
             {[
               { label: 'Available', val: nearbyListings.length || '–', icon: 'map-marker-multiple', index: 0 },
-              { label: 'My Claims', val: activeClaims.length || '–', icon: 'handshake', index: 1 },
+              { label: 'My Claims', val: activeClaims.length || '–', icon: 'basket', index: 1 },
               { label: 'Requests', val: stats?.requests_active ?? '–', icon: 'clipboard-text', index: 2 },
             ].map(s => (
               <TouchableOpacity
@@ -220,6 +220,29 @@ export default function RecipientHomeScreen() {
           )}
         </View>
       </ScrollView>
+
+      {/* FAB - New Request */}
+      <TouchableOpacity
+        onPress={() => router.push('/recipient/create-request' as any)}
+        style={{
+          position: 'absolute',
+          right: 16,
+          bottom: 16 + insets.bottom + 70,
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          backgroundColor: C.green,
+          alignItems: 'center',
+          justifyContent: 'center',
+          shadowColor: '#000',
+          shadowOpacity: 0.2,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 4 },
+          elevation: 6,
+        }}
+      >
+        <MaterialCommunityIcons name="plus" size={28} color="#fff" />
+      </TouchableOpacity>
 
       <BottomNavBar tabs={RECIPIENT_TABS} active="/recipient/home" />
     </View>

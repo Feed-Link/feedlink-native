@@ -15,7 +15,7 @@ const TABS = [
   { key: 'pending', label: 'Pending', icon: 'clock-outline' },
   { key: 'confirmed', label: 'Confirmed', icon: 'check-circle-outline' },
   { key: 'completed', label: 'Completed', icon: 'check-decagram' },
-  { key: '', label: 'All', icon: 'view-list-outline' },
+  { key: '', label: 'All', icon: 'list' },
 ];
 
 const EMPTY_CONFIG: Record<string, { icon: string; title: string; subtitle: string }> = {

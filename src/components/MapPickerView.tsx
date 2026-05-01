@@ -1,29 +1,35 @@
 /**
  * MapPickerView — interactive map for picking a location.
- *
+ * Also displays nearby markers that are clickable.
+ * 
  * Currently implemented with WebView + Leaflet for Expo Go compatibility.
- * To migrate to react-native-maps later:
- *   1. npm install react-native-maps
- *   2. Replace the WebView block below with:
- *        <MapView ... onPress={e => onPinChange(e.nativeEvent.coordinate.latitude, e.nativeEvent.coordinate.longitude)}>
- *          <Marker coordinate={{ latitude: lat, longitude: lng }} draggable onDragEnd={...} />
- *        </MapView>
- *   3. Remove the WebView import and HTML string — props interface stays identical.
  */
 
 import React from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { C } from '../theme';
+import { useRouter } from 'expo-router';
+
+interface Marker {
+  id: string;
+  lat: number;
+  lng: number;
+  title: string;
+}
 
 interface MapPickerViewProps {
   lat: number;
   lng: number;
-  onPinChange: (lat: number, lng: number) => void;
+  markers?: Marker[];
+  onPinChange?: (lat: number, lng: number) => void;
+  onMarkerPress?: (id: string) => void;
   style?: object;
 }
 
-export default function MapPickerView({ lat, lng, onPinChange, style }: MapPickerViewProps) {
+export default function MapPickerView({ lat, lng, markers = [], onPinChange, onMarkerPress, style }: MapPickerViewProps) {
+  const router = useRouter();
+  
   const html = `
 <!DOCTYPE html>
 <html>
@@ -46,28 +52,40 @@ export default function MapPickerView({ lat, lng, onPinChange, style }: MapPicke
       maxZoom: 19,
     }).addTo(map);
 
-    const icon = L.divIcon({
+    // User location marker
+    const userIcon = L.divIcon({
       className: '',
       html: '<div style="width:28px;height:28px;background:#16a34a;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>',
       iconSize: [28, 28],
       iconAnchor: [14, 14],
     });
+    L.marker([${lat}, ${lng}], { icon: userIcon }).addTo(map);
 
-    let marker = L.marker([${lat}, ${lng}], { icon, draggable: true }).addTo(map);
+    // Food listing markers - amber pin
+    const foodIcon = L.divIcon({
+      className: '',
+      html: '<div style="width:24px;height:24px;background:#f59e0b;border:2px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;"><span style="font-size:10px;">🍱</span></div>',
+      iconSize: [24, 24],
+      iconAnchor: [12, 24],
+    });
+
+    // Add markers for each listing
+    ${markers.map((m, i) => `
+    (function() {
+      const mk = L.marker([${m.lat}, ${m.lng}], { icon: foodIcon }).addTo(map);
+      mk.on('click', function() {
+        window.ReactNativeWebView.postMessage(JSON.stringify({ id: '${m.id}', action: 'marker' }));
+      });
+    })();
+    `).join('')}
 
     function sendCoords(lat, lng) {
       window.ReactNativeWebView.postMessage(JSON.stringify({ lat, lng }));
     }
 
-    marker.on('dragend', function(e) {
-      const { lat, lng } = e.target.getLatLng();
-      sendCoords(lat, lng);
-    });
-
+    // Allow clicking map to set location
     map.on('click', function(e) {
-      const { lat, lng } = e.latlng;
-      marker.setLatLng([lat, lng]);
-      sendCoords(lat, lng);
+      sendCoords(e.latlng.lat, e.latlng.lng);
     });
   </script>
 </body>
@@ -82,8 +100,12 @@ export default function MapPickerView({ lat, lng, onPinChange, style }: MapPicke
         scrollEnabled={false}
         onMessage={e => {
           try {
-            const { lat, lng } = JSON.parse(e.nativeEvent.data);
-            onPinChange(lat, lng);
+            const data = JSON.parse(e.nativeEvent.data);
+            if (data.action === 'marker' && data.id && onMarkerPress) {
+              onMarkerPress(data.id);
+            } else if (data.lat !== undefined && data.lng !== undefined && onPinChange) {
+              onPinChange(data.lat, data.lng);
+            }
           } catch {}
         }}
         renderLoading={() => (

@@ -76,17 +76,17 @@ export default function RecipientProfileScreen() {
               <Text style={{ fontSize: 11, fontWeight: '700', color: C.textMid, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 14 }}>Your Impact</Text>
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 {[
-                  { label: 'Collected', val: stats.collected ?? 0, icon: 'check-decagram' },
-                  { label: 'Active Claims', val: stats.active_claims ?? 0, icon: 'handshake' },
-                  { label: 'Requests', val: stats.requests ?? 0, icon: 'clipboard-text' },
+                  { label: 'Collected', val: stats.collected ?? 0, icon: 'check-decagram', nav: null },
+                  { label: 'Active Claims', val: stats.active_claims ?? 0, icon: 'basket', nav: '/recipient/my-claims' },
+                  { label: 'Requests', val: stats.requests ?? 0, icon: 'clipboard-text', nav: '/recipient/create-request' },
                 ].map(s => (
-                  <View key={s.label} style={{ flex: 1, backgroundColor: C.bg, borderRadius: 14, padding: 12, alignItems: 'center', gap: 6 }}>
+                  <TouchableOpacity key={s.label} onPress={() => s.nav && router.push(s.nav as any)} activeOpacity={s.nav ? 0.7 : 1} style={{ flex: 1, backgroundColor: C.bg, borderRadius: 14, padding: 12, alignItems: 'center', gap: 6 }}>
                     <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: C.tagGreen, alignItems: 'center', justifyContent: 'center' }}>
                       <MaterialCommunityIcons name={s.icon as any} size={16} color={C.green} />
                     </View>
                     <Text style={{ fontWeight: '800', fontSize: 22, color: C.textDark }}>{s.val}</Text>
                     <Text style={{ fontSize: 10, color: C.textMid, fontWeight: '600', textAlign: 'center' }}>{s.label}</Text>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </View>
             </View>

@@ -107,7 +107,7 @@ export default function DonorHomeScreen() {
           <View style={{ flexDirection: 'row', gap: 10, marginTop: 20 }}>
             {[
               { label: 'Active', val: stats?.listings_active ?? '–', icon: 'fire', status: 'active', index: 0 },
-              { label: 'Claimed', val: stats?.listings_claimed ?? '–', icon: 'handshake', status: 'claimed', index: 1 },
+              { label: 'Claimed', val: stats?.listings_claimed ?? '–', icon: 'basket', status: 'claimed', index: 1 },
               { label: 'Done', val: stats?.listings_completed ?? '–', icon: 'check-decagram', status: 'completed', index: 2 },
             ].map(s => (
               <Animated.View key={s.label} style={{ flex: 1, transform: [{ scale: scaleAnims[s.index] }] }}>

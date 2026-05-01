@@ -15,7 +15,7 @@ const ICONS: Record<string, { icon: string; color: string; bgColor: string }> = 
   claim_rejected:              { icon: 'close-circle-outline',   color: C.red,   bgColor: '#fee2e2' },
   pickup_completed:            { icon: 'check-decagram',         color: C.green, bgColor: C.tagGreen },
   listing_expired_uncollected: { icon: 'clock-alert-outline',    color: C.amber, bgColor: C.tagAmber },
-  request_accepted:            { icon: 'handshake',              color: C.green, bgColor: C.tagGreen },
+  request_accepted:            { icon: 'basket',              color: C.green, bgColor: C.tagGreen },
   acceptance_confirmed:        { icon: 'heart-circle-outline',   color: C.green, bgColor: C.tagGreen },
   acceptance_rejected:         { icon: 'heart-broken-outline',   color: C.red,   bgColor: '#fee2e2' },
   listing_cancelled:           { icon: 'trash-can-outline',      color: C.red,   bgColor: '#fee2e2' },
