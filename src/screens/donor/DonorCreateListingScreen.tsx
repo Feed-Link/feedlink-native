@@ -1,9 +1,10 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
+import { useGlobalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { Image, Keyboard, KeyboardAvoidingView, Modal, Platform, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, Image, Keyboard, KeyboardAvoidingView, Modal, Platform, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { shared } from '../../api/client';
 import { donor } from '../../api/donor';
@@ -18,12 +19,24 @@ import { C } from '../../theme';
 const ALL_TAGS = ['cooked', 'raw_ingredients', 'packaged', 'for_humans', 'for_animals', 'for_both'];
 const MAX_PHOTOS = 4;
 const STEPS = ['Details', 'Tags', 'Schedule'];
+const DRAFTS_KEY = 'fl_listing_drafts';
+
+interface Draft {
+  id: string;
+  form: any;
+  photosPreviews: any[];
+  createdAt: string;
+  title: string;
+}
 
 export default function DonorCreateListingScreen() {
   const { showToast } = useApp();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const params = useGlobalSearchParams();
+  const draftIdParam = params.draft as string | undefined;
 
+  const [editingDraftId, setEditingDraftId] = React.useState<string | null>(null);
   const [step, setStep] = React.useState(1);
   const [form, setForm] = React.useState({
     title: '', description: '', quantity: '', tags: [] as string[],
@@ -36,6 +49,71 @@ export default function DonorCreateListingScreen() {
   const [showExpiryPicker, setShowExpiryPicker] = React.useState(false);
   const [showPickupPicker, setShowPickupPicker] = React.useState(false);
   const [tempDate, setTempDate] = React.useState<Date>(new Date());
+
+  React.useEffect(() => {
+    if (draftIdParam) {
+      (async () => {
+        const drafts = await loadDrafts();
+        const draft = drafts.find(d => d.id === draftIdParam);
+        if (draft) {
+          setEditingDraftId(draft.id);
+          setForm(draft.form);
+          setPhotosPreviews(draft.photosPreviews);
+        }
+      })();
+    }
+  }, [draftIdParam]);
+
+  const loadDrafts = async (): Promise<Draft[]> => {
+    try {
+      const data = await AsyncStorage.getItem(DRAFTS_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch { return []; }
+  };
+
+  const saveDraft = async () => {
+    if (!form.title.trim() && !form.quantity.trim()) return;
+    const drafts = await loadDrafts();
+    const draft: Draft = {
+      id: editingDraftId || `draft_${Date.now()}`,
+      form,
+      photosPreviews,
+      createdAt: new Date().toISOString(),
+      title: form.title,
+    };
+    let updated: Draft[];
+    if (editingDraftId) {
+      updated = drafts.map(d => d.id === editingDraftId ? draft : d);
+    } else {
+      updated = [draft, ...drafts];
+      setEditingDraftId(draft.id);
+    }
+    await AsyncStorage.setItem(DRAFTS_KEY, JSON.stringify(updated));
+  };
+
+  const deleteDraft = async (id?: string) => {
+    const targetId = id || editingDraftId;
+    if (!targetId) return;
+    const drafts = await loadDrafts();
+    const updated = drafts.filter(d => d.id !== targetId);
+    await AsyncStorage.setItem(DRAFTS_KEY, JSON.stringify(updated));
+    if (editingDraftId === targetId) {
+      setEditingDraftId(null);
+      setForm({
+        title: '', description: '', quantity: '', tags: [], photos: [], expires_at: '', pickup_before: '', pickup_instructions: '',
+        address: 'Thamel, Kathmandu', latitude: 27.7172, longitude: 85.3240,
+      });
+      setPhotosPreviews([]);
+      setStep(1);
+    }
+  };
+
+  const restoreDraft = async (draft: Draft) => {
+    setEditingDraftId(draft.id);
+    setForm(draft.form);
+    setPhotosPreviews(draft.photosPreviews);
+    setStep(1);
+  };
 
   const set = (k: string) => (v: any) => setForm(p => ({ ...p, [k]: v }));
   const toggleTag = (tag: string) => setForm(p => ({
@@ -130,6 +208,7 @@ export default function DonorCreateListingScreen() {
       };
       if (form.pickup_before) payload.pickup_before = toLocalISO(form.pickup_before);
       await donor.createListing(payload);
+      if (editingDraftId) await deleteDraft();
       showToast('Listing posted!', 'success');
       router.push('/donor/listings' as any);
     } catch (e: any) {
@@ -137,16 +216,43 @@ export default function DonorCreateListingScreen() {
     } finally { setLoading(false); }
   };
 
+  const saveAndExit = async () => {
+    await saveDraft();
+    showToast('Draft saved', 'success');
+    router.push('/donor/listings' as any);
+  };
+
+  const confirmExit = () => {
+    if (form.title.trim() || form.quantity.trim()) {
+      Alert.alert(
+        'Save draft?',
+        'Do you want to save your progress as a draft?',
+        [
+          { text: 'Discard', style: 'destructive', onPress: () => router.push('/donor/listings' as any) },
+          { text: 'Save draft', onPress: saveAndExit },
+        ]
+      );
+    } else {
+      router.push('/donor/listings' as any);
+    }
+  };
+
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: C.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       {/* Header */}
       <View style={{ paddingTop: insets.top + 8, paddingHorizontal: 16, paddingBottom: 16, backgroundColor: C.surface, borderBottomWidth: 1, borderBottomColor: C.border }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-          <TouchableOpacity onPress={() => step > 1 ? setStep(s => s - 1) : router.push('/donor/listings' as any)} style={{ marginRight: 12 }}>
+          <TouchableOpacity onPress={confirmExit} style={{ marginRight: 12 }}>
             <MaterialCommunityIcons name="arrow-left" size={22} color={C.textDark} />
           </TouchableOpacity>
-          <Text style={{ fontWeight: '700', fontSize: 17, color: C.textDark, flex: 1 }}>New listing</Text>
-          <Text style={{ fontSize: 13, color: C.textMid, fontWeight: '600' }}>{step} / 3</Text>
+          <Text style={{ fontWeight: '700', fontSize: 17, color: C.textDark, flex: 1 }}>
+            {editingDraftId ? 'Continue draft' : 'New listing'}
+          </Text>
+          {(form.title.trim() || form.quantity.trim()) && (
+            <TouchableOpacity onPress={saveDraft} style={{ paddingHorizontal: 12, paddingVertical: 6, backgroundColor: C.surface2, borderRadius: 8 }}>
+              <Text style={{ fontSize: 13, fontWeight: '600', color: C.green }}>Save</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Step indicators */}

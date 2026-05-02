@@ -3,7 +3,13 @@ import { Stack } from 'expo-router';
 
 export default function RecipientLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
+      }}
+    >
       <Stack.Screen name="home" />
       <Stack.Screen name="listing-detail" />
       <Stack.Screen name="my-claims" />

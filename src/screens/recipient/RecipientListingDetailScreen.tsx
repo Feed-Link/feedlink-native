@@ -28,14 +28,11 @@ export default function RecipientListingDetailScreen() {
   const load = async () => {
     setLoading(true);
     try {
-      const userLat = user?.latitude || 27.7172;
-      const userLng = user?.longitude || 85.3240;
       const [lRes, cRes] = await Promise.all([
-        recipient.getNearbyListings(`?lat=${userLat}&lng=${userLng}&per_page=100`),
+        recipient.getListing(id),
         recipient.getClaims(),
       ]);
-      const listings = Array.isArray(lRes.data) ? lRes.data : [];
-      const found = listings.find((l: any) => l.id === id) || null;
+      const found = lRes.data || null;
       setListing(found);
       const claims = Array.isArray(cRes.data) ? cRes.data : [];
       const myClaim = claims.find((c: any) => c.food_listing_id === id);
@@ -103,7 +100,7 @@ export default function RecipientListingDetailScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: C.bg }}>
-      <ScreenHeader title="Listing Detail" />
+      <ScreenHeader title="Listing Detail" onBack={() => router.back()} />
       {loading ? (
         <Spinner />
       ) : !listing ? (
@@ -199,24 +196,20 @@ export default function RecipientListingDetailScreen() {
               </View>
             )}
 
-            {myClaim?.status === 'confirmed' && (
-              <View style={{ marginTop: 12, gap: 8 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: C.tagGreen, padding: 10, borderRadius: 8 }}>
-                  <MaterialCommunityIcons name="check-circle-outline" size={16} color={C.green} />
-                  <Text style={{ fontSize: 13, fontWeight: '600', color: C.green, flex: 1 }}>Claim confirmed — ready for pickup</Text>
-                </View>
-                <TouchableOpacity
-                  onPress={handleMarkCollected}
-                  disabled={actionLoading}
-                  activeOpacity={0.85}
-                  style={{ backgroundColor: C.green, paddingVertical: 12, borderRadius: 12, alignItems: 'center' }}
-                >
-                  <Text style={{ color: '#fff', fontSize: 14, fontWeight: '700' }}>{actionLoading ? 'Marking...' : 'Mark as collected'}</Text>
-                </TouchableOpacity>
-              </View>
+            {/* Show "Mark as collected" button when listing is claimed - but not after it's completed */}
+            {listing.status === 'claimed' && (
+              <TouchableOpacity
+                onPress={handleMarkCollected}
+                disabled={actionLoading}
+                activeOpacity={0.85}
+                style={{ backgroundColor: C.green, paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginTop: 8 }}
+              >
+                <Text style={{ color: '#fff', fontSize: 15, fontWeight: '700' }}>{actionLoading ? 'Marking...' : 'Mark as collected'}</Text>
+              </TouchableOpacity>
             )}
 
-            {myClaim?.status === 'collected' && (
+            {/* Show collected badge */}
+            {(myClaim?.status === 'collected' || listing.status === 'completed') && (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: C.tagGreen, padding: 10, borderRadius: 8, marginTop: 12 }}>
                 <MaterialCommunityIcons name="check-circle" size={16} color={C.green} />
                 <Text style={{ fontSize: 13, fontWeight: '600', color: C.green }}>Collected</Text>

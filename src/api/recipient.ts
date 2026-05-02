@@ -4,6 +4,9 @@ export const recipient = {
   // Nearby listings (for home screen)
   getNearbyListings: (query = '') => client.request(`/listings/nearby${query}`),
 
+  // Single listing by ID (for detail screens from notifications)
+  getListing: (id: string) => client.request(`/recipient/listings/${id}`),
+
   // My claims
   getClaims: (query = '') => client.request(`/recipient/claims${query}`),
   createClaim: (listingId: string, data?: any) =>

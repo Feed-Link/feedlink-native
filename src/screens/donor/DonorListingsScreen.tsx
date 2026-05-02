@@ -1,6 +1,8 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import React from 'react';
+import { Alert, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useApp } from '../../context/AppContext';
 import { C } from '../../theme';
@@ -9,13 +11,13 @@ import ListingCard from '../../components/ListingCard';
 import Spinner from '../../components/Spinner';
 import NotifPagination from '../../components/NotifPagination';
 import BottomNavBar, { DONOR_TABS } from '../../components/BottomNavBar';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const TABS = [
   { key: 'active', label: 'Active', icon: 'fire' },
   { key: 'claimed', label: 'Claimed', icon: 'basket' },
   { key: 'expired', label: 'Expired', icon: 'clock-remove-outline' },
   { key: '', label: 'All', icon: 'list' },
+  { key: 'drafts', label: 'Drafts', icon: 'file-outline' },
 ];
 
 const SORT_OPTIONS = [
@@ -27,6 +29,7 @@ const EMPTY_CONFIG: Record<string, { icon: string; title: string; subtitle: stri
   active:  { icon: 'fire',            title: 'No active listings',  subtitle: 'Post a listing and start sharing food today' },
   claimed: { icon: 'basket',       title: 'No claimed listings', subtitle: 'When a recipient claims your food it shows here' },
   expired: { icon: 'clock-remove-outline', title: 'No expired listings', subtitle: 'Listings past their expiry date appear here' },
+  drafts: { icon: 'file-outline', title: 'No drafts', subtitle: 'Save a listing draft to finish later' },
   '':      { icon: 'inbox-outline',     title: 'No listings yet',     subtitle: "You haven't posted any food listings yet" },
 };
 
@@ -44,6 +47,34 @@ export default function DonorListingsScreen() {
   const [refreshing, setRefreshing] = React.useState(false);
   const [page, setPage] = React.useState(1);
   const [meta, setMeta] = React.useState<any>(null);
+  const [drafts, setDrafts] = React.useState<any[]>([]);
+
+  const DRAFTS_KEY = 'fl_listing_drafts';
+
+  const loadDrafts = async () => {
+    try {
+      const data = await AsyncStorage.getItem(DRAFTS_KEY);
+      setDrafts(data ? JSON.parse(data) : []);
+    } catch { setDrafts([]); }
+  };
+
+  const deleteDraft = async (id: string) => {
+    Alert.alert('Delete draft?', 'This cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          const updated = drafts.filter(d => d.id !== id);
+          await AsyncStorage.setItem(DRAFTS_KEY, JSON.stringify(updated));
+          setDrafts(updated);
+          showToast('Draft deleted', 'success');
+        },
+      },
+    ]);
+  };
+
+  React.useEffect(() => { loadDrafts(); }, []);
 
   const fetchListings = async (status: string, p: number, isRefresh = false) => {
     if (isRefresh) setRefreshing(true); else setLoading(true);
@@ -61,8 +92,18 @@ export default function DonorListingsScreen() {
     }
   };
 
-  React.useEffect(() => { setPage(1); }, [tab, sort]);
-  React.useEffect(() => { fetchListings(tab, page); }, [tab, page, sort]);
+  React.useEffect(() => {
+    if (tab === 'drafts') {
+      loadDrafts();
+    } else {
+      setPage(1);
+      fetchListings(tab, 1);
+    }
+  }, [tab]);
+
+  React.useEffect(() => {
+    if (tab !== 'drafts') fetchListings(tab, page);
+  }, [tab, page, sort]);
 
   const lastPage = meta?.last_page || 1;
   const total = meta?.total || 0;
@@ -116,27 +157,61 @@ export default function DonorListingsScreen() {
             ))}
           </ScrollView>
 
-          {/* Sort */}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <MaterialCommunityIcons name="sort-variant" size={14} color={C.textMid} />
-            <Text style={{ fontSize: 12, color: C.textMid, fontWeight: '600', marginRight: 4 }}>Sort:</Text>
-            {SORT_OPTIONS.map(s => (
-              <TouchableOpacity
-                key={s.key}
-                onPress={() => setSort(s.key)}
-                activeOpacity={0.7}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 99, backgroundColor: sort === s.key ? C.tagGreen : C.surface2, borderWidth: 1, borderColor: sort === s.key ? C.green : 'transparent' }}
-              >
-                <MaterialCommunityIcons name={s.icon as any} size={12} color={sort === s.key ? C.green : C.textMid} />
-                <Text style={{ fontSize: 12, fontWeight: sort === s.key ? '700' : '500', color: sort === s.key ? C.green : C.textMid }}>{s.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+          {/* Sort - hide for drafts */}
+          {tab !== 'drafts' && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <MaterialCommunityIcons name="sort-variant" size={14} color={C.textMid} />
+              <Text style={{ fontSize: 12, color: C.textMid, fontWeight: '600', marginRight: 4 }}>Sort:</Text>
+              {SORT_OPTIONS.map(s => (
+                <TouchableOpacity
+                  key={s.key}
+                  onPress={() => setSort(s.key)}
+                  activeOpacity={0.7}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 99, backgroundColor: sort === s.key ? C.tagGreen : C.surface2, borderWidth: 1, borderColor: sort === s.key ? C.green : 'transparent' }}
+                >
+                  <MaterialCommunityIcons name={s.icon as any} size={12} color={sort === s.key ? C.green : C.textMid} />
+                  <Text style={{ fontSize: 12, fontWeight: sort === s.key ? '700' : '500', color: sort === s.key ? C.green : C.textMid }}>{s.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
         </View>
 
         <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
           {loading ? (
             <Spinner />
+          ) : tab === 'drafts' ? (
+            drafts.length === 0 ? (
+              <View style={{ alignItems: 'center', paddingVertical: 56, gap: 12 }}>
+                <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: C.surface2, alignItems: 'center', justifyContent: 'center', marginBottom: 4 }}>
+                  <MaterialCommunityIcons name="file-outline" size={32} color={C.textLight} />
+                </View>
+                <Text style={{ fontSize: 16, fontWeight: '700', color: C.textDark }}>No drafts</Text>
+                <Text style={{ fontSize: 13, color: C.textMid, textAlign: 'center', paddingHorizontal: 32, lineHeight: 20 }}>Save a listing draft to finish later</Text>
+              </View>
+            ) : (
+              drafts.map((d: any) => (
+                <TouchableOpacity
+                  key={d.id}
+                  onPress={() => router.push(`/donor/create-listing?draft=${d.id}` as any)}
+                  activeOpacity={0.85}
+                  style={{ backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, borderRadius: 16, padding: 14, marginBottom: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontWeight: '700', fontSize: 14, color: C.textDark }} numberOfLines={1}>{d.title || 'Untitled draft'}</Text>
+                    <Text style={{ fontSize: 12, color: C.textMid, marginTop: 4 }}>
+                      Saved {new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => deleteDraft(d.id)}
+                    style={{ padding: 8 }}
+                  >
+                    <MaterialCommunityIcons name="delete-outline" size={20} color={C.red} />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              ))
+            )
           ) : sortedListings.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 56, gap: 12 }}>
               <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: C.surface2, alignItems: 'center', justifyContent: 'center', marginBottom: 4 }}>
@@ -164,7 +239,7 @@ export default function DonorListingsScreen() {
             ))
           )}
 
-          {!loading && lastPage > 1 && (
+          {!loading && tab !== 'drafts' && lastPage > 1 && (
             <NotifPagination page={page} lastPage={lastPage} total={total} perPage={PER_PAGE} onChange={p => setPage(p)} />
           )}
         </View>
