@@ -70,7 +70,18 @@ export const auth = {
   getProfile: () => request('/user/profile'),
 
   logout: () => request('/auth/logout', { method: 'GET' }),
+
+  guestRegister: (data: { name: string; location: { lat: number; long: number }; contact?: string }) =>
+    request('/auth/guest-register', { method: 'POST', body: JSON.stringify(data) }),
+
+  upgradeGuest: (data: { email: string; password: string; password_confirmation: string; contact: string }) =>
+    request('/user/upgrade-guest', { method: 'PUT', body: JSON.stringify(data) }),
+
+  updateLocation: (data: { latitude: number; longitude: number }) =>
+    request('/user/location', { method: 'PUT', body: JSON.stringify(data) }),
 };
+
+export const client = { request, setTokens, getToken, clearTokens, loadTokens };
 
 // Shared
 export const shared = {

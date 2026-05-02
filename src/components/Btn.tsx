@@ -2,7 +2,7 @@ import React from 'react';
 import { TouchableOpacity, Text, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
 import { C } from '../theme';
 
-type BtnVariant = 'primary' | 'amber' | 'outline' | 'danger' | 'ghost';
+type BtnVariant = 'primary' | 'amber' | 'outline' | 'danger' | 'ghost' | 'blue' | 'green';
 type BtnSize = 'sm' | 'md' | 'lg';
 
 interface BtnProps {
@@ -16,13 +16,14 @@ interface BtnProps {
   loading?: boolean;
 }
 
-const gradMap = {
+const gradMap: Record<string, [string, string]> = {
   primary: [C.green, C.greenDark],
   amber: ['rgb(251,191,36)', 'rgb(217,119,6)'],
+  blue: [C.blue, 'rgb(37,99,235)'],
 };
 
 export default function Btn({ children, onPress, variant = 'primary', fullWidth, size = 'md', disabled, style, loading }: BtnProps) {
-  const isGradient = variant === 'primary' || variant === 'amber';
+  const isGradient = variant === 'primary' || variant === 'amber' || variant === 'blue';
   const sz = { sm: { h: 34, px: 16, fs: 12 }, md: { h: 48, px: 22, fs: 15 }, lg: { h: 54, px: 24, fs: 16 } }[size];
 
   const baseStyle: ViewStyle = {
@@ -37,14 +38,14 @@ export default function Btn({ children, onPress, variant = 'primary', fullWidth,
   };
 
   const variantStyle: ViewStyle = isGradient
-    ? { backgroundColor: disabled ? C.surface2 : C[variant === 'primary' ? 'green' : 'amber'] }
+    ? { backgroundColor: disabled ? C.surface2 : variant === 'blue' ? C.blue : variant === 'green' ? C.green : C.green }
     : variant === 'outline'
     ? { backgroundColor: C.surface, borderWidth: 1.5, borderColor: C.border }
     : variant === 'danger'
     ? { backgroundColor: C.surface, borderWidth: 1.5, borderColor: 'rgb(250,202,202)' }
     : { backgroundColor: 'transparent' };
 
-  const textColor = disabled ? C.textLight : (variant === 'primary' || variant === 'amber') ? '#fff' : variant === 'danger' ? C.red : C.textDark;
+  const textColor = disabled ? C.textLight : (variant === 'primary' || variant === 'amber' || variant === 'blue' || variant === 'green') ? '#fff' : variant === 'danger' ? C.red : C.textDark;
 
   return (
     <TouchableOpacity

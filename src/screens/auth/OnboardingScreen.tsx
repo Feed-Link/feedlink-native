@@ -10,6 +10,7 @@ import Btn from '../../components/Btn';
 const OPTIONS = [
   { value: 'donor', title: 'Donate Food', sub: 'I have surplus food to share with others', icon: 'hand-heart-outline', color: C.green, bg: C.tagGreen },
   { value: 'recipient', title: 'Receive Food', sub: "I'm looking for food for myself or my community", icon: 'account-heart-outline', color: C.amber, bg: C.tagAmber },
+  { value: 'guest', title: 'Quick Post', sub: 'Post food without creating an account', icon: 'food-outline', color: C.blue, bg: 'rgba(61,133,220,0.1)' },
 ];
 
 export default function OnboardingScreen() {
@@ -49,7 +50,7 @@ export default function OnboardingScreen() {
                   borderRadius: 20, padding: 20, borderWidth: 2,
                   flexDirection: 'row', alignItems: 'center', gap: 16,
                   borderColor: selected ? opt.color : C.border,
-                  backgroundColor: selected ? (opt.value === 'donor' ? 'rgba(22,163,74,0.04)' : 'rgba(245,158,11,0.04)') : C.surface,
+                  backgroundColor: selected ? (opt.value === 'donor' ? 'rgba(22,163,74,0.04)' : opt.value === 'recipient' ? 'rgba(245,158,11,0.04)' : 'rgba(61,133,220,0.04)') : C.surface,
                 }}
               >
                 <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: selected ? opt.bg : C.surface2, alignItems: 'center', justifyContent: 'center' }}>
@@ -72,7 +73,7 @@ export default function OnboardingScreen() {
 
       {/* Footer */}
       <View style={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 24, gap: 14 }}>
-        <Btn fullWidth size="lg" variant="amber" onPress={() => router.push(`/register?role=${role}` as any)}>
+        <Btn fullWidth size="lg" variant={role === 'guest' ? 'blue' : 'amber'} onPress={() => router.push(role === 'guest' ? '/guest-register' as any : `/register?role=${role}` as any)}>
           Continue
         </Btn>
         <Text style={{ textAlign: 'center', fontSize: 14, color: C.textMid }}>

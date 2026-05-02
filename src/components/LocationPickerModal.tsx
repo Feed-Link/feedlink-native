@@ -12,9 +12,10 @@ interface LocationPickerModalProps {
   address: string;
   onConfirm: (lat: number, lng: number, addr: string) => void;
   onClose: () => void;
+  accentColor?: string;
 }
 
-export default function LocationPickerModal({ lat, lng, address, onConfirm, onClose }: LocationPickerModalProps) {
+export default function LocationPickerModal({ lat, lng, address, onConfirm, onClose, accentColor = C.green }: LocationPickerModalProps) {
   const insets = useSafeAreaInsets();
   const [search, setSearch] = React.useState('');
   const [results, setResults] = React.useState<any[]>([]);
@@ -96,19 +97,17 @@ export default function LocationPickerModal({ lat, lng, address, onConfirm, onCl
   return (
     <View style={styles.overlay}>
       <View style={[styles.sheet, { paddingBottom: insets.bottom }]}>
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
             <Text style={styles.closeText}>✕</Text>
           </TouchableOpacity>
           <Text style={styles.title}>Pick location</Text>
-          <TouchableOpacity onPress={useMyLocation} style={styles.myLocationBtn}>
-            <Text style={styles.myLocationText}>📍 My location</Text>
+          <TouchableOpacity onPress={useMyLocation} style={[styles.myLocationBtn, { borderColor: accentColor }]}>
+            <Text style={[styles.myLocationText, { color: accentColor }]}>📍 My location</Text>
           </TouchableOpacity>
         </View>
 
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-          {/* Search */}
           <View style={styles.searchContainer}>
             <MaterialCommunityIcons name="magnify" size={18} color={C.textMid} style={{ marginRight: 8 }} />
             <TextInput
@@ -125,34 +124,16 @@ export default function LocationPickerModal({ lat, lng, address, onConfirm, onCl
             )}
           </View>
 
-          {/* Search results list */}
           {results.length > 0 ? (
-            <View style={{
-              marginHorizontal: 16, marginBottom: 12,
-              backgroundColor: C.surface,
-              borderRadius: 14,
-              borderWidth: 1, borderColor: C.border,
-              overflow: 'hidden',
-              shadowColor: '#000', shadowOpacity: 0.08,
-              shadowRadius: 12, shadowOffset: { width: 0, height: 4 },
-              elevation: 4,
-            }}>
+            <View style={styles.resultsBox}>
               {results.map((item, i) => (
                 <TouchableOpacity
                   key={i}
                   onPress={() => moveTo(item.lat, item.lng, item.display)}
                   activeOpacity={0.6}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingVertical: 11,
-                    paddingHorizontal: 14,
-                    borderBottomWidth: i < results.length - 1 ? 1 : 0,
-                    borderBottomColor: C.border,
-                    gap: 10,
-                  }}
+                  style={styles.resultItem}
                 >
-                  <MaterialCommunityIcons name="map-marker-outline" size={18} color={C.green} style={{ flexShrink: 0 }} />
+                  <MaterialCommunityIcons name="map-marker-outline" size={18} color={accentColor} style={{ flexShrink: 0 }} />
                   <Text style={{ fontSize: 13, color: C.textDark, flex: 1, opacity: 0.85 }} numberOfLines={2}>{item.display}</Text>
                 </TouchableOpacity>
               ))}
@@ -164,7 +145,6 @@ export default function LocationPickerModal({ lat, lng, address, onConfirm, onCl
             </View>
           ) : null}
 
-          {/* Map */}
           {results.length === 0 && (
             <View style={{ flex: 1, marginHorizontal: 16, marginVertical: 8, borderRadius: 14, overflow: 'hidden', minHeight: 220 }}>
               <MapPickerView
@@ -180,7 +160,6 @@ export default function LocationPickerModal({ lat, lng, address, onConfirm, onCl
           )}
         </ScrollView>
 
-        {/* Footer */}
         <View style={styles.footer}>
           <View style={styles.addressRow}>
             <Text style={{ fontSize: 12, marginRight: 8 }}>📍</Text>
@@ -189,7 +168,7 @@ export default function LocationPickerModal({ lat, lng, address, onConfirm, onCl
           <TouchableOpacity
             onPress={() => onConfirm(pin.lat, pin.lng, pinAddress)}
             disabled={geocoding || !pinAddress}
-            style={[styles.confirmBtn, (geocoding || !pinAddress) && styles.confirmBtnDisabled]}
+            style={[styles.confirmBtn, { backgroundColor: accentColor }, (geocoding || !pinAddress) && styles.confirmBtnDisabled]}
           >
             <Text style={styles.confirmBtnText}>Confirm location</Text>
           </TouchableOpacity>
@@ -230,6 +209,10 @@ const styles = StyleSheet.create({
     fontSize: 22,
     padding: 0,
   },
+  closeText: {
+    fontSize: 22,
+    color: C.textMid,
+  },
   title: {
     fontWeight: '700',
     fontSize: 16,
@@ -238,14 +221,12 @@ const styles = StyleSheet.create({
   },
   myLocationBtn: {
     borderWidth: 1.5,
-    borderColor: C.green,
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
   myLocationText: {
     fontSize: 12,
-    color: C.green,
     fontWeight: '700',
   },
   searchContainer: {
@@ -265,6 +246,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: C.textDark,
     backgroundColor: C.surface,
+  },
+  resultsBox: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    backgroundColor: C.surface,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: C.border,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  resultItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: C.border,
+    gap: 10,
   },
   footer: {
     padding: 12,
@@ -286,7 +290,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   confirmBtn: {
-    backgroundColor: C.green,
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',

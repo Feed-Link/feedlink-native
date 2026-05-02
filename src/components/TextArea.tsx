@@ -9,9 +9,10 @@ interface TextAreaProps {
   placeholder?: string;
   rows?: number;
   required?: boolean;
+  accentColor?: string;
 }
 
-export default function TextArea({ label, value, onChange, placeholder, rows = 3, required }: TextAreaProps) {
+export default function TextArea({ label, value, onChange, placeholder, rows = 3, required, accentColor = C.green }: TextAreaProps) {
   const [focused, setFocused] = React.useState(false);
 
   return (
@@ -34,14 +35,14 @@ export default function TextArea({ label, value, onChange, placeholder, rows = 3
           width: '100%',
           borderRadius: 14,
           borderWidth: 2,
-          borderColor: focused ? C.green : 'transparent',
+          borderColor: focused ? accentColor : 'transparent',
           backgroundColor: C.surface2,
           padding: 12,
           fontSize: 14,
           color: C.textDark,
           textAlignVertical: 'top',
           outlineStyle: 'none',
-          shadowColor: focused ? C.green : 'transparent',
+          shadowColor: focused ? accentColor : 'transparent',
           shadowOpacity: focused ? 0.1 : 0,
           shadowRadius: 4,
           shadowOffset: { width: 0, height: 0 },

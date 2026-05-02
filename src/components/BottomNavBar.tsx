@@ -85,3 +85,10 @@ export const RECIPIENT_TABS: TabItem[] = [
   { key: '/recipient/notifications', label: 'Alerts',    iconName: 'notifications-outline' },
   { key: '/recipient/profile',       label: 'Profile',   iconName: 'person-outline' },
 ];
+
+// Guest-specific tabs (minimal)
+export const GUEST_TABS: TabItem[] = [
+  { key: '/guest/home', label: 'Home', iconName: 'home-outline' },
+  { key: '/guest/listings', label: 'Listings', iconName: 'grid-outline' },
+  { key: '/guest/profile', label: 'Profile', iconName: 'person-outline' },
+];

@@ -5,12 +5,13 @@ import { C } from '../theme';
 interface InputProps extends TextInputProps {
   label?: string;
   required?: boolean;
+  accentColor?: string;
 }
 
-export default React.memo(function Input({ label, value, onChangeText, placeholder, required, secureTextEntry, keyboardType, style, ...rest }: InputProps) {
+export default React.memo(function Input({ label, value, onChangeText, placeholder, required, secureTextEntry, keyboardType, style, accentColor = C.green, ...rest }: InputProps) {
   const [focused, setFocused] = React.useState(false);
 
-  const borderColor = focused ? C.green : 'transparent';
+  const borderColor = focused ? accentColor : 'transparent';
   const bgColor = focused ? C.surface : C.surface2;
 
   return (

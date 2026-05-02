@@ -61,8 +61,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
           const res = await api.auth.getProfile();
           setUser(res.data);
           const seg = segments.join('/');
-          if (!seg.includes('auth')) return; // already in app
-          router.replace((`/${storedRole}/home` as any));
+          if (!seg.includes('auth') && !seg.includes('guest')) return;
+          // Navigate based on role
+          if (storedRole === 'guest') {
+            router.replace('/guest/home' as any);
+          } else {
+            router.replace(`/${storedRole}/home` as any);
+          }
         } catch (_) { /* token invalid */ }
       }
     };

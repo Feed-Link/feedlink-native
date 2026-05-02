@@ -6,6 +6,7 @@ interface TagChipProps {
   tag: string;
   selected: boolean;
   onClick: () => void;
+  accentColor?: string;
 }
 
 const labels: Record<string, string> = {
@@ -17,7 +18,7 @@ const labels: Record<string, string> = {
   packaged: 'Packaged',
 };
 
-export default function TagChip({ tag, selected, onClick }: TagChipProps) {
+export default function TagChip({ tag, selected, onClick, accentColor = C.green }: TagChipProps) {
   return (
     <TouchableOpacity
       onPress={onClick}
@@ -27,7 +28,7 @@ export default function TagChip({ tag, selected, onClick }: TagChipProps) {
         paddingHorizontal: 16,
         borderRadius: 99,
         borderWidth: 0,
-        backgroundColor: selected ? C.green : C.surface2,
+        backgroundColor: selected ? accentColor : C.surface2,
         justifyContent: 'center',
         flexShrink: 0,
       } as ViewStyle}

@@ -197,14 +197,14 @@ export default function RecipientHomeScreen() {
                         </View>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, flex: 1 }}>
                         <MaterialCommunityIcons name="package-variant-closed" size={12} color={C.textLight} />
                         <Text style={{ fontSize: 12, color: C.textLight }} numberOfLines={1}>{l.quantity || '—'}</Text>
                       </View>
                       {l.address && (
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, flex: 1 }}>
                           <MaterialCommunityIcons name="map-marker-outline" size={12} color={C.textLight} />
-                          <Text style={{ fontSize: 11, color: C.textLight }} numberOfLines={1}>{l.address.split(',')[0]}</Text>
+                          <Text style={{ fontSize: 11, color: C.textLight, flex: 1 }} numberOfLines={1}>{l.address.split(',')[0]}</Text>
                         </View>
                       )}
                     </View>

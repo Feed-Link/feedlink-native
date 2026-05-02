@@ -11,6 +11,7 @@ export default function AuthLayout() {
     >
       <Stack.Screen name="splash" />
       <Stack.Screen name="onboarding" />
+      <Stack.Screen name="guest-register" />
       <Stack.Screen name="register" />
       <Stack.Screen name="verify-otp" />
       <Stack.Screen name="login" />
